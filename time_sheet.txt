@@ -1,6 +1,0 @@
-Entries: 
--> 10 hours, 10 minutes, 10 seconds
--> 4 hours, 3 minutes, 2 seconds
--> 5 hours, 3 minutes, 2 seconds
--> 5 hours, 6 minutes, 7 seconds
--> 6 hours, 7 minutes, 8 seconds
