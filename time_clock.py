@@ -4,19 +4,24 @@ from sys import exit
 
 runtime = False # init value to False until ready for execution
 command_phrases=['submit', 'formats-help'] # phrases which can be used during program execution
+output_file = 'timesheet.txt' # default file where entries will be stored as output
 time_sheet = "Entries: \n" # base template for time-sheet file
 total = [0,0,0] # total sum of all entries, stored in order of hours, minutes, seconds
 
 def intro():
 	"""Introduce the user to program functionality, entry format."""
-	global runtime, command_phrases
+	global runtime, command_phrases, output_file
 	print("Welcome to Timeclock, a simple terminal application.")
 	print("You can add entries in hours, minutes, and seconds.")
-	print("When you are finished with entry, type 'submit'\n"
-	+"to save entries to a text file.\n")
-	print("To see available entry formats, type 'formats-help'\n")
+	print("When you are finished with entry, type 'submit'.\n")
+	print("To see available entry formats, type 'formats-help'.\n")
+	print("To set filename for saving timesheet, type 'filename-set'.")
 	ans = input("Hit enter to continue, or type a command.\n")
-	if ans.lower() == 'formats-help':
+	if ans.lower() == 'filename-set':
+	    filename=input("Enter name for txt output of timesheet: ")
+	    print(f"Entries will be written to {filename}.\n\n")
+	    output_file = filename
+	elif ans.lower() == 'formats-help':
 		with open('input_formats.txt') as file:
 			print(file.read())
 	elif ans.lower() == 'exit':
@@ -55,9 +60,9 @@ def entry_prompt():
 		
 def save_entries():
 	global time_sheet
-	with open('time_sheet.txt', 'w') as file:
+	with open(output_file, 'w') as file:
 		file.write(time_sheet)
-	print("Entries saved to 'time_sheet.txt'")
+	print(f"Entries saved to '{output_file}'")
 
 def clear_screen():
 	"""Clear the terminal/console of any generated text."""
