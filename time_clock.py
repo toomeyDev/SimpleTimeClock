@@ -1,4 +1,4 @@
-from os import system, name
+from os import system, name, path
 from time import sleep
 from sys import exit
 
@@ -52,17 +52,44 @@ def entry_prompt():
 		total[0] += int(hrs)
 		total[1] += int(mts)
 		total[2] += int(sec)
+		format_time()
 		time_sheet += f"-> {hrs} hours, {mts} minutes, {sec} seconds\n"
 		time_sheet += f"|# Total: {total[0]} hours, {total[1]} minutes, {total[2]} seconds #|"
 		sleep(1)
 		runtime = False
 		clear_screen()
-		
+
+def format_time():
+	"""
+	Format the current total values, converting values
+	greater than or equal to 60 to their equivalent larger
+	time denominations (ie: 120 seconds becomes 2 minutes,
+	180 minutes becomes three hours and so on).
+	"""
+	index = 0
+	for item in total:
+		if item / 60 >= 1 and index != 0:
+			item_remainder = item % 60
+			quotient = int(item / 60)
+			total[index - 1] += quotient
+			total[index] = item_remainder
+		index += 1
+
+			
 def save_entries():
-	global time_sheet
-	with open(output_file, 'w') as file:
-		file.write(time_sheet)
-	print(f"Entries saved to '{output_file}'")
+    global time_sheet, output_file
+    if path.isfile(output_file):
+	    ans=input(f"Are you sure you want to overwrite the file {output_file}?")
+	    if ans.lower() == 'n' or ans.lower() == 'no':
+	        output_file = input("Choose an alternate filename for output: ")
+	    else:
+	        print(f"{output_file} will be overwritten.")
+	        
+    with open(output_file, 'w') as file:
+	    file.write(time_sheet)
+	
+    print(f"Entries saved to '{output_file}'")
+
 
 def clear_screen():
 	"""Clear the terminal/console of any generated text."""
@@ -72,9 +99,13 @@ def clear_screen():
 	# use 'clear' for all other operating systems (linux, macosx etc)
 	else:
 		system('clear')
-	
-intro()
-while runtime:
-	entry_prompt()
-	print(time_sheet)
-save_entries()
+
+def main():
+	intro()
+	while runtime:
+		entry_prompt()
+		print(time_sheet)
+	save_entries()	
+
+if __name__ == '__main__':	
+	main()
