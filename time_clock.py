@@ -1,12 +1,23 @@
 from os import system, name, path
 from time import sleep
 from sys import exit
+import json
 
 runtime = False # init value to False until ready for execution
 command_phrases=['submit', 'formats-help'] # phrases which can be used during program execution
 output_file = 'timesheet.txt' # default file where entries will be stored as output
 time_sheet = "Entries: \n" # base template for time-sheet file
 total = [0,0,0] # total sum of all entries, stored in order of hours, minutes, seconds
+
+def load_dataset(data_path: str) :
+    """
+    Load the json object at specified path into data.
+    """
+    json_file = open(data_path)
+    return json.load(json_file)
+
+data = [load_dataset('commands.json')] #hold different json files for access during runtime
+
 
 def intro():
 	"""Introduce the user to program functionality, entry format."""
@@ -15,18 +26,25 @@ def intro():
 	print("You can add entries in hours, minutes, and seconds.")
 	print("When you are finished with entry, type 'submit'.\n")
 	print("To see available entry formats, type 'formats-help'.\n")
-	print("To set filename for saving timesheet, type 'filename-set'.")
+	print("To set filename for saving timesheet, type 'filename-set'.\n")
+	print("For a full list of available commands, type 'commands'\n")
 	ans = input("Hit enter to continue, or type a command.\n")
-	if ans.lower() == 'filename-set':
-	    filename=input("Enter name for txt output of timesheet: ")
-	    print(f"Entries will be written to {filename}.\n\n")
-	    output_file = filename
-	elif ans.lower() == 'formats-help':
-		with open('input_formats.txt') as file:
-			print(file.read())
-	elif ans.lower() == 'exit':
-		clear_screen()
-		exit("Exiting...")
+	while ans != '':
+		if ans.lower() == 'filename-set':
+			filename=input("Enter name for txt output of timesheet: ")
+			print(f"Entries will be written to {filename}.\n\n")
+			output_file = filename
+		elif ans.lower() == 'formats-help':
+			with open('input_formats.txt') as file:
+				print(file.read())
+		elif ans.lower() == 'commands':
+				print(data[0])
+		elif ans.lower() == 'exit':
+			clear_screen()
+			exit("Exiting...")
+		else: 
+			ans = input(f"Unrecognized command: {ans}\n")
+		ans = input("\nHit enter to continue, or type a command.\n")
 	runtime = True # set value to true to execute main loop
 	
 def entry_prompt():
