@@ -1,5 +1,7 @@
 {
+	"Available Commands":"",
 	"commands":"Display a list of all available commands to the terminal/console.",
+	"clear":"Clear the terminal/console of any accumulated output.",
 	"exit":"Clear the terminal/console and exit the program.",
 	"formats-help":"Display a list of available file formats for time recording.",
 	"filename-set":"Set the name of the file where the output will be stored."

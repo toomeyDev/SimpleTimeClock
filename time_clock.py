@@ -3,11 +3,13 @@ from time import sleep
 from sys import exit
 import json
 
-runtime = False # init value to False until ready for execution
+runtime = True # init value to True to start program loop
 command_phrases=['submit', 'formats-help'] # phrases which can be used during program execution
 output_file = 'timesheet.txt' # default file where entries will be stored as output
 time_sheet = "Entries: \n" # base template for time-sheet file
 total = [0,0,0] # total sum of all entries, stored in order of hours, minutes, seconds
+entry_mode = 0 # handles different operational modes for the entry prompt, 0 = don't prompt for filename,
+# 1 = prompt for filename
 
 def load_dataset(data_path: str) :
     """
@@ -38,44 +40,59 @@ def intro():
 			with open('input_formats.txt') as file:
 				print(file.read())
 		elif ans.lower() == 'commands':
-				print(data[0])
+				for key, value in data[0].items():
+					if(key == "Available Commands"):
+						print(f"{key}\n")
+						continue
+					print(f"-> {key} | {value}\n")
+		elif ans.lower() == 'clear':
+			clear_screen()
 		elif ans.lower() == 'exit':
 			clear_screen()
 			exit("Exiting...")
 		else: 
-			ans = input(f"Unrecognized command: {ans}\n")
+			print(f"Unrecognized command: {ans}\n")
 		ans = input("\nHit enter to continue, or type a command.\n")
 	runtime = True # set value to true to execute main loop
 	
 def entry_prompt():
-	global time_sheet, runtime, total
-	hrs = input("Hours: ")
-	mts = input("Minutes: ")
-	sec = input("Sec: ")
-	print(f"{hrs} hours, {mts} minutes, and {sec} seconds, is this correct?")
-	ans = input("Enter (y/n), type 'submit' to finish entry: ")
+	global time_sheet, runtime, total, output_file, entry_mode
+	if entry_mode == 1:
+		filename = input("Enter filename for new timesheet:\n"
+		+ "[leave blank to use the same filename again]\n")
+		if filename == "":
+			filename = output_file
+		print(f"Entries will be written to {filename}.\n\n")
+		output_file = filename
+		entry_mode = 0
+	while True:
+		hrs = input("Hours: ")
+		mts = input("Minutes: ")
+		sec = input("Sec: ")
+		print(f"{hrs} hours, {mts} minutes, and {sec} seconds, is this correct?")
+		ans = input("Enter (y/n), type 'submit' to finish entry: ")
 	
-	# prompt for confirmation
-	if ans.lower() == 'y':
-		# add entered values to total
-		total[0] += int(hrs)
-		total[1] += int(mts)
-		total[2] += int(sec)
+		# prompt for confirmation
+		if ans.lower() == 'y':
+			# add entered values to total
+			total[0] += int(hrs)
+			total[1] += int(mts)
+			total[2] += int(sec)
 		
-		time_sheet += f"-> {hrs} hours, {mts} minutes, {sec} seconds\n"
-		clear_screen()
-	elif ans.lower() == 'submit':
-		print("Submitting...")
-		# add entered values to total
-		total[0] += int(hrs)
-		total[1] += int(mts)
-		total[2] += int(sec)
-		format_time()
-		time_sheet += f"-> {hrs} hours, {mts} minutes, {sec} seconds\n"
-		time_sheet += f"|# Total: {total[0]} hours, {total[1]} minutes, {total[2]} seconds #|"
-		sleep(1)
-		runtime = False
-		clear_screen()
+			time_sheet += f"-> {hrs} hours, {mts} minutes, {sec} seconds\n"
+			clear_screen()
+		elif ans.lower() == 'submit':
+			print("Submitting...")
+			# add entered values to total
+			total[0] += int(hrs)
+			total[1] += int(mts)
+			total[2] += int(sec)
+			format_time()
+			time_sheet += f"-> {hrs} hours, {mts} minutes, {sec} seconds\n"
+			time_sheet += f"|# Total: {total[0]} hours, {total[1]} minutes, {total[2]} seconds #|"
+			sleep(1)
+			clear_screen()
+			break
 
 def format_time():
 	"""
@@ -95,18 +112,24 @@ def format_time():
 
 			
 def save_entries():
-    global time_sheet, output_file
-    if path.isfile(output_file):
-	    ans=input(f"Are you sure you want to overwrite the file {output_file}?")
+	global time_sheet, output_file, runtime, entry_mode
+	if path.isfile(output_file):
+	    ans=input(f"Are you sure you want to overwrite the file {output_file}?\n")
 	    if ans.lower() == 'n' or ans.lower() == 'no':
 	        output_file = input("Choose an alternate filename for output: ")
 	    else:
 	        print(f"{output_file} will be overwritten.")
 	        
-    with open(output_file, 'w') as file:
+	with open(output_file, 'w') as file:
 	    file.write(time_sheet)
 	
-    print(f"Entries saved to '{output_file}'")
+	print(f"Entries saved to '{output_file}'\n")
+	ans = input("Fillout another timesheet? (y/n)\n")
+	if ans.lower() != 'y':
+		runtime = False
+		print("Exiting...")
+	else:
+		entry_mode = 1
 
 
 def clear_screen():
@@ -123,7 +146,7 @@ def main():
 	while runtime:
 		entry_prompt()
 		print(time_sheet)
-	save_entries()	
+		save_entries()	
 
 if __name__ == '__main__':	
 	main()
