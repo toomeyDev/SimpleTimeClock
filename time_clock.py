@@ -1,9 +1,9 @@
 from os import system, name, path
+from subprocess import Popen
 from time import sleep
-from sys import exit
+from sys import exit, path
 import json
 
-runtime = True # init value to True to start program loop
 output_file = 'timesheet.txt' # default file where entries will be stored as output
 time_sheet = "Entries: \n" # base template for time-sheet file
 total = [0,0,0] # total sum of all entries, stored in order of hours, minutes, seconds
@@ -17,8 +17,19 @@ def load_dataset(data_path: str) :
     json_file = open(data_path)
     return json.load(json_file)
 
-data = [load_dataset('commands.json')] #hold different json files for access during runtime
+def format_json(json_file) :
+    """Format a json file for easy legibility."""
+    output = ""
+    for key, value in json_file.items():
+        if(key == "Available Commands" or key == "Preferences"):
+            output += (f"\n{key}:\n")
+            continue
+        output +=(f"-> {key} | {value}\n")
+    return output    
 
+
+data = [load_dataset('commands.json')] #hold different json files for access during runtime
+data.append(load_dataset('preferences.json'))
 # menu functionality (intro, set filename, display help, commands
 def intro():
     """Introduce the user to program functionality, entry format."""
@@ -41,7 +52,22 @@ def set_filename():
     print(f"Entries will be written to {filename}.\n\n")
     output_file = filename
 
+def preferences():
+    """
+    Alter various preferences related to the program, including
+    output location (save files) 
+    """
+    print(format_json(data[1]))
+    print("To change preferences, enter the name of a preference\n"
+    +"followed by 'true' or 'false', ie: file_folder true will\n"
+    +"set the file_folder option to true.")
+    ans = input().lower()
+    #while ans != "":
+    #    if ans == "file_folder true":
+    #        print("Test")
+            
 
+    
 def formats_help():
     """
     Display information about available formats and current format
@@ -56,11 +82,7 @@ def commands_list():
     Display a list of available commands to the user from the
     'commands.json' file.
     """
-    for key, value in data[0].items():
-        if(key == "Available Commands"):
-            print(f"{key}\n")
-            continue
-        print(f"-> {key} | {value}\n")
+    print(format_json(data[0]))
         
 
 def exit_program():
@@ -83,10 +105,14 @@ def menu_sequence():
             set_filename()
         elif ans.lower() == 'formats-help':
             formats_help()
+        elif ans.lower() == 'directory-set':
+            directory_set()
         elif ans.lower() == 'commands':
             commands_list()
         elif ans.lower() == 'clear':
             clear_screen()
+        elif ans.lower() == 'preferences':
+            preferences()    
         elif ans.lower() == 'exit':
             exit_program()
         else: 
@@ -151,6 +177,8 @@ def submit_time(entry: []):
     
     time_sheet += (f"|# Total: {total[0]} hours, {total[1]} minutes," 
     +f" {total[2]} seconds #|")
+    
+    print(time_sheet)
     
     clear_screen()
     

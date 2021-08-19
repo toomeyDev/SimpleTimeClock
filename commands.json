@@ -4,5 +4,6 @@
 	"clear":"Clear the terminal/console of any accumulated output.",
 	"exit":"Clear the terminal/console and exit the program.",
 	"formats-help":"Display a list of available file formats for time recording.",
-	"filename-set":"Set the name of the file where the output will be stored."
+	"filename-set":"Set the name of the file where the output will be stored.",
+	"preferences":"Set user-preferences (location of saved files, prompts, etc)"
 }
