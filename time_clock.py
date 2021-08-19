@@ -4,7 +4,6 @@ from sys import exit
 import json
 
 runtime = True # init value to True to start program loop
-command_phrases=['submit', 'formats-help'] # phrases which can be used during program execution
 output_file = 'timesheet.txt' # default file where entries will be stored as output
 time_sheet = "Entries: \n" # base template for time-sheet file
 total = [0,0,0] # total sum of all entries, stored in order of hours, minutes, seconds
@@ -117,6 +116,8 @@ def add_to_total(entry: []):
     # clear screen, print out current timesheet for user
     clear_screen()
     print(time_sheet)
+    print(f"Current Total: {total[0]} hours, {total[1]} minutes," 
+    +f" {total[2]} seconds")
 
 
 def format_time():
@@ -174,12 +175,9 @@ def entry_sequence():
 
 def reset_values():
     """Reset values necessary for running the program to initial state."""
-    global total, timesheet
-    index = 0
-    for value in total:
-        total[index] = 0
-        index += 1
-    timesheet = "Entries: \n"
+    global total, time_sheet
+    total = [0,0,0]
+    time_sheet = "Entries: \n"
 
             
 def save_entries():
