@@ -1,1 +1,3 @@
-{"Preferences": "", "file_folder": "False"}
+{
+"Preferences": "", "File Folder":"If enabled, save finished timesheet files to an 'output' directory created in the program folder", "file_folder": "False", "Entry Confirmation": "If enabled, prompt for confirmation at the end of each entry when entering time to the timesheet.", "entry_confirmation": "True", "Auto .txt":"If enabled, automatically append .txt extension to filename if there is no file extension", "auto_txt": "True"
+}

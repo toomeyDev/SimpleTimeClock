@@ -1,6 +1,5 @@
 from os import system, name, makedirs
 import os
-from subprocess import Popen
 from time import sleep
 from sys import exit, path
 import json
@@ -111,6 +110,16 @@ def commands_list():
     """
     print(format_json(data[0]))
         
+
+def clear_screen():
+    """Clear the terminal/console of any generated text."""
+    # make use of 'cls' command to clear screen in Windows
+    if name == 'nt':
+        system('cls')
+    # use 'clear' for all other operating systems (linux, macosx etc)
+    else:
+        system('clear')
+
 
 def exit_program():
     """Terminate the program."""
@@ -273,15 +282,6 @@ def save_entries():
         reset_values()
         clear_screen()
         
-        
-def clear_screen():
-    """Clear the terminal/console of any generated text."""
-    # make use of 'cls' command to clear screen in Windows
-    if name == 'nt':
-        system('cls')
-    # use 'clear' for all other operating systems (linux, macosx etc)
-    else:
-        system('clear')
         
 def main():
     intro()
