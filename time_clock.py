@@ -1,4 +1,5 @@
-from os import system, name, path
+from os import system, name, makedirs
+import os
 from subprocess import Popen
 from time import sleep
 from sys import exit, path
@@ -61,12 +62,27 @@ def preferences():
     print("To change preferences, enter the name of a preference\n"
     +"followed by 'true' or 'false', ie: file_folder true will\n"
     +"set the file_folder option to true.")
+    print("Type 'exit' to leave preference settings.")
     ans = input().lower()
-    #while ans != "":
-    #    if ans == "file_folder true":
-    #        print("Test")
+    while ans != "":
+        if ans == "file_folder true":
+            data[1]['file_folder'] = "True"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')    
+            print(format_json(data[1]))
+            break
+        elif ans == "file_folder false":
+            data[1]['file_folder'] = "False"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')
+            print(format_json(data[1]))
+            break
+        elif ans == "exit":
+            print("Exiting preferences... \n")
+            break
             
-
     
 def formats_help():
     """
@@ -76,6 +92,17 @@ def formats_help():
     with open('input_formats.txt') as file:
         print(file.read())
         
+
+def file_folder():
+    """
+    Create a diectory for storing timesheet output if it doesn't
+    exist, and toggle the use of this directory if user changes
+    'file_folder' preference to false.
+    """
+    if data[1]['file_folder'] == "True":
+        if not os.path.exists('output'):
+            makedirs('output')
+    print(f"New output directory created at {os.path.abspath('output')}")
 
 def commands_list():
     """
@@ -117,6 +144,11 @@ def menu_sequence():
             exit_program()
         else: 
             print(f"Unrecognized command: {ans}\n")
+        
+        if (data[1]['file_folder'] == "True" and 
+        not os.path.exists('output')):
+            file_folder()
+        
         ans = input("\nHit enter to continue, or type a command.\n")
         
 
@@ -179,7 +211,7 @@ def submit_time(entry: []):
     +f" {total[2]} seconds #|")
     
     print(time_sheet)
-    
+    sleep(2)
     clear_screen()
     
 def entry_sequence():
@@ -210,16 +242,28 @@ def reset_values():
             
 def save_entries():
     global output_file, runtime, entry_mode
-    if path.isfile(output_file):
-        ans=input(f"Are you sure you want to overwrite the file {output_file}?\n")
+    
+    # set directory to save finished timesheet to
+    output_directory = os.getcwd()
+    if data[1]['file_folder'] == "True":
+        output_directory = 'output'
+    # join directory path and filename for write operation
+    file_path = os.path.join(output_directory, output_file)
+    # check to see if current file already exists
+    if os.path.isfile(file_path):
+        ans=input(f"Are you sure you want to overwrite the file {file_path}?\n")
         if ans.lower() == 'n' or ans.lower() == 'no':
             output_file = input("Choose an alternate filename for output: ")
+            file_path = os.path.join(output_directory, output_file)
         else:
-            print(f"{output_file} will be overwritten.")
+            print(f"{file_path} will be overwritten.")
     # write recorded time to file using specified name
-    with open(output_file, 'w') as file:
+    
+    
+        
+    with open(file_path, 'w') as file:
         file.write(time_sheet)
-        print(f"Entries saved to '{output_file}'\n")
+        print(f"Entries saved to '{file_path}'\n")
     
     ans = input("Fill out another timesheet? (y/n)\n")
     if ans.lower() != 'y':
