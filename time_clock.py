@@ -61,23 +61,35 @@ def preferences():
     print("To change preferences, enter the name of a preference\n"
     +"followed by 'true' or 'false', ie: file_folder true will\n"
     +"set the file_folder option to true.")
-    print("Type 'exit' to leave preference settings.")
-    ans = input().lower()
+    ans = None
     while ans != "":
+        ans = input("\nType 'exit' to leave preference settings.\n").lower()
         if ans == "file_folder true":
             data[1]['file_folder'] = "True"
             with open('preferences.json', 'w') as file:
                 json.dump(data[1], file)
             data[1] = load_dataset('preferences.json')    
             print(format_json(data[1]))
-            break
+            # create output folder if it does not exist
+            file_folder()
         elif ans == "file_folder false":
             data[1]['file_folder'] = "False"
             with open('preferences.json', 'w') as file:
                 json.dump(data[1], file)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
-            break
+        elif ans == "entry_confirmation true":
+            data[1]['entry_confirmation'] = "True"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')
+            print(format_json(data[1]))
+        elif ans == "entry_confirmation false":
+            data[1]['entry_confirmation'] = "False"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')
+            print(format_json(data[1]))
         elif ans == "exit":
             print("Exiting preferences... \n")
             break
@@ -102,6 +114,7 @@ def file_folder():
         if not os.path.exists('output'):
             makedirs('output')
     print(f"New output directory created at {os.path.abspath('output')}")
+
 
 def commands_list():
     """
@@ -153,10 +166,6 @@ def menu_sequence():
             exit_program()
         else: 
             print(f"Unrecognized command: {ans}\n")
-        
-        if (data[1]['file_folder'] == "True" and 
-        not os.path.exists('output')):
-            file_folder()
         
         ans = input("\nHit enter to continue, or type a command.\n")
         
