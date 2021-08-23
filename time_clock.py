@@ -31,6 +31,7 @@ def format_json(json_file) :
 data = [load_dataset('commands.json')] #hold different json files for access during runtime
 data.append(load_dataset('preferences.json'))
 # menu functionality (intro, set filename, display help, commands
+
 def intro():
     """Introduce the user to program functionality, entry format."""
     print("Welcome to Timeclock, a simple terminal application.")
@@ -39,7 +40,7 @@ def intro():
     print("To see available entry formats, type 'formats-help'.\n")
     print("To set filename for saving timesheet, type 'filename-set'.\n")
     print("For a full list of available commands, type 'commands'\n")
-
+    print("To see this message again at any time, type 'intro'\n")
 
 def set_filename():
     global output_file
@@ -146,23 +147,25 @@ def menu_sequence():
     """Handle user input commands and control-flow of initial menu."""
     global entry_mode
     if(entry_mode == 0):
-        ans = input("Hit enter to continue, or type a command.\n")
+        ans = input("Hit enter to continue, or type a command.\n").lower()
     else:
-        ans = input("Hit enter to start a timesheet, or type a command.\n")
+        ans = input("Hit enter to start a timesheet, or type a command.\n").lower()
     while ans != '':
-        if ans.lower() == 'filename-set':
+        if ans == 'filename-set':
             set_filename()
-        elif ans.lower() == 'formats-help':
+        elif ans == 'formats-help':
             formats_help()
-        elif ans.lower() == 'directory-set':
+        elif ans == 'directory-set':
             directory_set()
-        elif ans.lower() == 'commands':
+        elif ans == 'intro':
+            intro()
+        elif ans == 'commands':
             commands_list()
-        elif ans.lower() == 'clear':
+        elif ans == 'clear':
             clear_screen()
-        elif ans.lower() == 'preferences':
+        elif ans == 'preferences':
             preferences()    
-        elif ans.lower() == 'exit':
+        elif ans == 'exit':
             exit_program()
         else: 
             print(f"Unrecognized command: {ans}\n")

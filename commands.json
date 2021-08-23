@@ -1,5 +1,6 @@
 {
 	"Available Commands":"",
+    "intro":"Display the intro prompt with program information to the terminal.",
 	"commands":"Display a list of all available commands to the terminal/console.",
 	"clear":"Clear the terminal/console of any accumulated output.",
 	"exit":"Clear the terminal/console and exit the program.",
