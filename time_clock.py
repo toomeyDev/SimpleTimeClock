@@ -49,9 +49,33 @@ def set_filename():
     +f"[Leave empty to reuse the current filename {output_file}]")
     if filename == '':
         filename = output_file
-        
+    
+    filename = txt_append(filename) # if auto_txt is true, append '.txt'
     print(f"Entries will be written to {filename}.\n\n")
     output_file = filename
+
+def txt_append(input_string: str):
+    """
+    Append '.txt' to the end of the provided string
+    if 'auto_txt' == True
+    """
+    if data[1]["auto_txt"] == "True":    
+        if input_string.find('.txt') == -1:
+            input_string += '.txt'
+            return input_string
+    return input_string
+
+def reset_preferences():
+    """Reset all user-preferences to default values."""
+    print("\nResetting user preferences to default values...\n")
+    data[1]['file_folder'] = "False"
+    data[1]['entry_confirmation'] = "True"
+    data[1]['auto_txt'] = "True"
+    with open('preferences.json', 'w') as file:
+        json.dump(data[1], file)
+    data[1] = load_dataset('preferences.json')
+    print(format_json(data[1]))
+        
 
 def preferences():
     """
@@ -61,7 +85,8 @@ def preferences():
     print(format_json(data[1]))
     print("To change preferences, enter the name of a preference\n"
     +"followed by 'true' or 'false', ie: file_folder true will\n"
-    +"set the file_folder option to true.")
+    +"set the file_folder option to true.\nType 'reset' to"
+    + " reset all preferences to default values.")
     ans = None
     while ans != "":
         ans = input("\nType 'exit' to leave preference settings.\n").lower()
@@ -91,6 +116,20 @@ def preferences():
                 json.dump(data[1], file)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
+        elif ans == "auto_txt false":
+            data[1]["auto_txt"] = "False"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')
+            print(format_json(data[1]))
+        elif ans == "auto_txt true":
+            data[1]["auto_txt"] = "True"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')
+            print(format_json(data[1]))
+        elif ans == "reset":
+            reset_preferences()
         elif ans == "exit":
             print("Exiting preferences... \n")
             break
@@ -177,8 +216,12 @@ def log_time():
     hrs = int(input("Hours: "))
     mts = int(input("Minutes: "))
     sec = int(input("Sec: "))
-    print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
-    ans = input("Enter (y/n), type 'submit' to finish entry: ")
+    if data[1]['entry_confirmation'] == 'True':
+        print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
+        ans = input("Enter (y/n), type 'submit' to finish entry: \n")
+    else:
+        # if entry_confirmation is false, show a different prompt
+        ans = input("Type 'submit' to finish entry, or enter to continue.\n")
     output = [hrs, mts, sec, ans] # store time, response to prompt
     return output
 
@@ -242,17 +285,23 @@ def entry_sequence():
         entry_mode = 0
     while True:
         entry = log_time() #entry[0]=hrs, entry[1]=mts, entry[2]=sec
-        ans = entry[3] # store user response to validation prompt
-        if ans == 'y':
-            add_to_total(entry)
-        elif ans == 'submit':
-            submit_time(entry)
-            break
+        ans = entry[-1] # store user response to validation prompt
+        if data[1]['entry_confirmation'] == 'True':
+            if ans == 'y':
+                add_to_total(entry)
+            elif ans == 'submit':
+                submit_time(entry)
+                break
+            else:
+                print("Discarding entry...")
+                sleep(1)
+                clear_screen()
         else:
-            print("Discarding entry...")
-            sleep(1)
-            clear_screen()
-
+            if ans == 'submit':
+                submit_time(entry)
+                break
+            elif ans == '':
+                add_to_total(entry)
 
 def reset_values():
     """Reset values necessary for running the program to initial state."""
@@ -275,6 +324,7 @@ def save_entries():
         ans=input(f"Are you sure you want to overwrite the file {file_path}?\n")
         if ans.lower() == 'n' or ans.lower() == 'no':
             output_file = input("Choose an alternate filename for output: ")
+            output_file = txt_append(output_file) # if auto_txt is true, append '.txt'
             file_path = os.path.join(output_directory, output_file)
         else:
             print(f"{file_path} will be overwritten.")
