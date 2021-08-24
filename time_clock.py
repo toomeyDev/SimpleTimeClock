@@ -128,6 +128,24 @@ def preferences():
                 json.dump(data[1], file)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
+        elif ans == "entry_format separate_prompt":
+            data[1]["entry_format"] = "separate_prompt"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')
+            print(format_json(data[1]))
+        elif ans == "entry_format condensed_prompt":
+            data[1]["entry_format"] = "condensed_prompt"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')
+            print(format_json(data[1]))
+        elif ans == "entry_format simplified_prompt":
+            data[1]["entry_format"] = "simplified_prompt"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+            data[1] = load_dataset('preferences.json')
+            print(format_json(data[1]))
         elif ans == "reset":
             reset_preferences()
         elif ans == "exit":
@@ -211,6 +229,22 @@ def menu_sequence():
         
         ans = input("\nHit enter to continue, or type a command.\n")
         
+
+def set_entry_format(format: str):
+    """
+    Set the entry format (what values the user is prompted for when typing in
+    entries) to the specified value. Should support a broad variety of formats
+    for versatility and adapability for a wide breadth of uses.
+    """
+    format = format.lower()
+    # note, current functionality is placeholder
+    if format == "separate-prompt":
+        print("separate")
+    elif format == "condensed":
+        print("condensed")
+    elif format == "simplified":
+        print("simplified")
+
 
 def log_time():
     hrs = int(input("Hours: "))
