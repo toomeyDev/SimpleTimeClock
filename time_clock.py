@@ -10,12 +10,14 @@ total = [0,0,0] # total sum of all entries, stored in order of hours, minutes, s
 entry_mode = 0 # handles different operational modes for the entry prompt, 0 = don't prompt for filename,
 # 1 = prompt for filename
 
+
 def load_dataset(data_path: str) :
     """
     Load the json object at specified path into data.
     """
     json_file = open(data_path)
     return json.load(json_file)
+
 
 def format_json(json_file) :
     """Format a json file for easy legibility."""
@@ -32,6 +34,7 @@ data = [load_dataset('commands.json')] #hold different json files for access dur
 data.append(load_dataset('preferences.json'))
 # menu functionality (intro, set filename, display help, commands
 
+
 def intro():
     """Introduce the user to program functionality, entry format."""
     print("Welcome to Timeclock, a simple terminal application.")
@@ -41,6 +44,7 @@ def intro():
     print("To set filename for saving timesheet, type 'filename-set'.\n")
     print("For a full list of available commands, type 'commands'\n")
     print("To see this message again at any time, type 'intro'\n")
+
 
 def set_filename():
     global output_file
@@ -54,6 +58,7 @@ def set_filename():
     print(f"Entries will be written to {filename}.\n\n")
     output_file = filename
 
+
 def txt_append(input_string: str):
     """
     Append '.txt' to the end of the provided string
@@ -64,6 +69,7 @@ def txt_append(input_string: str):
             input_string += '.txt'
             return input_string
     return input_string
+
 
 def reset_preferences():
     """Reset all user-preferences to default values."""
@@ -212,6 +218,8 @@ def menu_sequence():
             set_filename()
         elif ans == 'formats-help':
             formats_help()
+        elif ans == 'set-entry-format':
+            set_entry_format()
         elif ans == 'directory-set':
             directory_set()
         elif ans == 'intro':
@@ -228,35 +236,63 @@ def menu_sequence():
             print(f"Unrecognized command: {ans}\n")
         
         ans = input("\nHit enter to continue, or type a command.\n")
-        
 
-def set_entry_format(format: str):
+def set_entry_format():
     """
     Set the entry format (what values the user is prompted for when typing in
     entries) to the specified value. Should support a broad variety of formats
     for versatility and adapability for a wide breadth of uses.
     """
-    format = format.lower()
-    # note, current functionality is placeholder
-    if format == "separate-prompt":
-        print("separate")
-    elif format == "condensed":
-        print("condensed")
-    elif format == "simplified":
+    print(f"Current format is {data[1]['entry_format']}.\n")
+    print("Available formats include: \n")
+    formats_help()
+    ans = input("Enter the name of a format and the current\n"
+    +"format will be switched to the specified format\n"
+    +"ie: 'condensed_prompt' will switch to condensed format.\n\n")
+    if ans == "separate_prompt":
+        data[1]["entry_format"] = "separate_prompt"
+        with open('preferences.json', 'w') as file:
+            json.dump(data[1], file)
+        data[1] = load_dataset('preferences.json')
+        
+        print("Entry format successfully changed to separate prompt.\n")
+    elif ans == "condensed_prompt":
+        data[1]["entry_format"] = "condensed_prompt"
+        with open('preferences.json', 'w') as file:
+            json.dump(data[1], file)
+        data[1] = load_dataset('preferences.json')
+        print("Entry format successfully changed to condensed prompt.\n")
+    elif ans == "simplified":
+        # placeholder pending implementation of simplified prompt
         print("simplified")
 
 
 def log_time():
-    hrs = int(input("Hours: "))
-    mts = int(input("Minutes: "))
-    sec = int(input("Sec: "))
-    if data[1]['entry_confirmation'] == 'True':
-        print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
-        ans = input("Enter (y/n), type 'submit' to finish entry: \n")
-    else:
-        # if entry_confirmation is false, show a different prompt
-        ans = input("Type 'submit' to finish entry, or enter to continue.\n")
-    output = [hrs, mts, sec, ans] # store time, response to prompt
+    output = [] # create empty list to store output
+    if data[1]["entry_format"] == "separate_prompt":
+        hrs = int(input("Hours: "))
+        mts = int(input("Minutes: "))
+        sec = int(input("Sec: "))
+        if data[1]['entry_confirmation'] == 'True':
+            print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
+            ans = input("Enter (y/n), type 'submit' to finish entry: \n")
+        else:
+            # if entry_confirmation is false, show a different prompt
+            ans = input("Type 'submit' to finish entry, or enter to continue.\n")
+        output = [hrs, mts, sec, ans] # store time, response to prompt
+    elif data[1]["entry_format"] == "condensed_prompt":
+        condensed = input("Enter in order 'hrs' 'min' 'sec'\n"
+        +"on a single line separated by spaces: ")
+        num_values = [int(s) for s in condensed.split() if s.isdigit()]
+        hrs = num_values[0]
+        mts = num_values[1]
+        sec = num_values[2]
+        if data[1]['entry_confirmation'] =='True':
+            print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
+            ans = input("Enter (y/n), type 'submit to finish entry: \n")
+        else:
+            ans = input("Type 'submit' to finish entry, or enter to continue.\n")
+        output = [hrs, mts, sec, ans]
     return output
 
 
@@ -311,6 +347,7 @@ def submit_time(entry: []):
     print(time_sheet)
     sleep(2)
     clear_screen()
+
     
 def entry_sequence():
     global time_sheet, runtime, total, output_file, entry_mode
@@ -337,6 +374,7 @@ def entry_sequence():
             elif ans == '':
                 add_to_total(entry)
 
+
 def reset_values():
     """Reset values necessary for running the program to initial state."""
     global total, time_sheet
@@ -362,10 +400,8 @@ def save_entries():
             file_path = os.path.join(output_directory, output_file)
         else:
             print(f"{file_path} will be overwritten.")
-    # write recorded time to file using specified name
-    
-    
-        
+
+    # write recorded time to file using specified name                
     with open(file_path, 'w') as file:
         file.write(time_sheet)
         print(f"Entries saved to '{file_path}'\n")
