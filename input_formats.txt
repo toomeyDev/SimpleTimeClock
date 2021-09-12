@@ -1,7 +1,7 @@
 Available input formats include: 
- -> separate-prompt (Prompt for hours, minutes, and seconds separately)
- -> condensed-prompt (Prompt for hours, minutes, and seconds in one-line)
- -> simplified-prompt (prompt for just hours and minutes, with a simple format)
+ -> separate_prompt (Prompt for hours, minutes, and seconds separately)
+ -> condensed_prompt (Prompt for hours, minutes, and seconds in one-line)
+ -> simplified_prompt (prompt for just hours and minutes, with a simple format)
 	
-To choose one of these formats, type 'format <name_of_format>', with the format
-you prefer.
+To choose one of these formats, type 'entry-format-set' at the menu,
+then choose the format you prefer.

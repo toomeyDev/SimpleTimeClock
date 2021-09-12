@@ -157,6 +157,7 @@ def preferences():
             reset_preferences()
         elif ans == "exit":
             print("Exiting preferences... \n")
+            clear_screen()
             break
             
     
@@ -211,7 +212,7 @@ def menu_sequence():
     """Handle user input commands and control-flow of initial menu."""
     global entry_mode
     if(entry_mode == 0):
-        ans = input("Hit enter to continue, or type a command.\n").lower()
+        ans = input("Hit enter to start a timesheet, or type a command.\n").lower()
     else:
         ans = input("Hit enter to start a timesheet, or type a command.\n").lower()
     while ans != '':
@@ -219,8 +220,8 @@ def menu_sequence():
             set_filename()
         elif ans == 'formats-help':
             formats_help()
-        elif ans == 'set-entry-format':
-            set_entry_format()
+        elif ans == 'entry-format-set':
+            entry_format_set()
         elif ans == 'directory-set':
             directory_set()
         elif ans == 'intro':
@@ -238,7 +239,7 @@ def menu_sequence():
         
         ans = input("\nHit enter to continue, or type a command.\n")
 
-def set_entry_format():
+def entry_format_set():
     """
     Set the entry format (what values the user is prompted for when typing in
     entries) to the specified value. Should support a broad variety of formats
@@ -263,9 +264,12 @@ def set_entry_format():
             json.dump(data[1], file)
         data[1] = load_dataset('preferences.json')
         print("Entry format successfully changed to condensed prompt.\n")
-    elif ans == "simplified":
-        # placeholder pending implementation of simplified prompt
-        print("simplified")
+    elif ans == "simplified_prompt":
+        data[1]["entry_format"] = "simplified_prompt"
+        with open('preferences.json', 'w') as file:
+            json.dump(data[1], file)
+        data[1] = load_dataset('preferences.json')
+        print("Entry format successfully changed to simplified prompt.\n")
 
 
 def log_time():
@@ -294,6 +298,18 @@ def log_time():
         else:
             ans = input("Type 'submit' to finish entry, or enter to continue.\n")
         output = [hrs, mts, sec, ans]
+    elif data[1]["entry_format"] == "simplified_prompt":
+        hrs = 0
+        mts = int(input("Minutes: "))
+        sec = int(input("Seconds: "))
+        if data[1]['entry_confirmation'] == 'True':
+            print(f"{mts} minutes, and {sec} seconds, correct?")
+            ans = input("Enter (y/n), type 'submit' to finish entry: \n")
+        else:
+            # if entry_confirmation is false, show a different prompt
+            ans = input("Type 'submit' to finish entry, or enter to continue.\n")
+        output = [hrs, mts, sec, ans] # store time, response to prompt
+        
     return output
 
 
@@ -374,6 +390,8 @@ def entry_sequence():
                 break
             elif ans == '':
                 add_to_total(entry)
+            else:
+                print('Command not recognized, adding to total...\n')
 
 
 def reset_values():
