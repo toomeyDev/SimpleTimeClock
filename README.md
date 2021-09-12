@@ -16,8 +16,8 @@ including:
 For a full list of supported preferences, use the command 'preferences'
 while the program is running.
 
-Planned support for a variety of time entry formats 
 
+Planned support for a variety of time entry formats 
 IE (hrs minutes seconds, only minutes and seconds, condensed on one line)
 
 For a full overview of planned entry formats, check the following issue: 
