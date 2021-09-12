@@ -77,6 +77,7 @@ def reset_preferences():
     data[1]['file_folder'] = "False"
     data[1]['entry_confirmation'] = "True"
     data[1]['auto_txt'] = "True"
+    data[1]['entry_format'] = "separate_prompt"
     with open('preferences.json', 'w') as file:
         json.dump(data[1], file)
     data[1] = load_dataset('preferences.json')
