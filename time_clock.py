@@ -362,7 +362,8 @@ def submit_time(entry: []):
     +f" {total[2]} seconds #|")
     
     print(time_sheet)
-    sleep(2)
+    input("Press enter to continue.")
+     
     clear_screen()
 
     
