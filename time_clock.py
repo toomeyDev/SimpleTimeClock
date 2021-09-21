@@ -27,7 +27,7 @@ def format_json(json_file) :
             output += (f"\n{key}:\n")
             continue
         output +=(f"-> {key} | {value}\n")
-    return output    
+    return output
 
 
 data = [load_dataset('commands.json')] #hold different json files for access during runtime
@@ -37,26 +37,32 @@ data.append(load_dataset('preferences.json'))
 
 def intro():
     """Introduce the user to program functionality, entry format."""
-    print("Welcome to Timeclock, a simple terminal application.")
-    print("You can add entries in hours, minutes, and seconds.")
-    print("When you are finished with entry, type 'submit'.\n")
-    print("To see available entry formats, type 'formats-help'.\n")
-    print("To set filename for saving timesheet, type 'filename-set'.\n")
-    print("For a full list of available commands, type 'commands'\n")
-    print("To see this message again at any time, type 'intro'\n")
+    print("Welcome to TimeClock, a simple terminal application"
+    + " for recording time.\n")
+    print("You can add entries in hours, minutes, and seconds,")
+    print("when you are finished with entry, type 'submit'")
+    print("to see available entry formats, type 'formats-help'")
+    print("to set filename for saving timesheet, type 'filename-set'")
+    print("for a full list of available commands, type 'commands'")
+    print("to see this message again at any time, type 'intro'\n")
 
 
 def set_filename():
-    global output_file
+    global output_file, entry_mode
     """Set the filename where finished timesheet results will be saved."""
     filename=input("Enter name for text output of new timesheet: \n"
     +f"[Leave empty to reuse the current filename {output_file}]")
     if filename == '':
         filename = output_file
-    
+
     filename = txt_append(filename) # if auto_txt is true, append '.txt'
     print(f"Entries will be written to {filename}.\n\n")
     output_file = filename
+
+    """ reset entry mode if user manually changes filename during second timesheet
+    and later. """
+    if entry_mode == 1:
+        entry_mode = 0
 
 
 def txt_append(input_string: str):
@@ -64,7 +70,7 @@ def txt_append(input_string: str):
     Append '.txt' to the end of the provided string
     if 'auto_txt' == True
     """
-    if data[1]["auto_txt"] == "True":    
+    if data[1]["auto_txt"] == "True":
         if input_string.find('.txt') == -1:
             input_string += '.txt'
             return input_string
@@ -82,12 +88,12 @@ def reset_preferences():
         json.dump(data[1], file)
     data[1] = load_dataset('preferences.json')
     print(format_json(data[1]))
-        
+
 
 def preferences():
     """
     Alter various preferences related to the program, including
-    output location (save files) 
+    output location (save files)
     """
     print(format_json(data[1]))
     print("To change preferences, enter the name of a preference\n"
@@ -101,7 +107,7 @@ def preferences():
             data[1]['file_folder'] = "True"
             with open('preferences.json', 'w') as file:
                 json.dump(data[1], file)
-            data[1] = load_dataset('preferences.json')    
+            data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
             # create output folder if it does not exist
             file_folder()
@@ -159,8 +165,8 @@ def preferences():
             print("Exiting preferences... \n")
             clear_screen()
             break
-            
-    
+
+
 def formats_help():
     """
     Display information about available formats and current format
@@ -168,7 +174,7 @@ def formats_help():
     """
     with open('input_formats.txt') as file:
         print(file.read())
-        
+
 
 def file_folder():
     """
@@ -188,7 +194,7 @@ def commands_list():
     'commands.json' file.
     """
     print(format_json(data[0]))
-        
+
 
 def clear_screen():
     """Clear the terminal/console of any generated text."""
@@ -207,7 +213,7 @@ def exit_program():
     sleep(1)
     exit()
 
-        
+
 def menu_sequence():
     """Handle user input commands and control-flow of initial menu."""
     global entry_mode
@@ -231,13 +237,14 @@ def menu_sequence():
         elif ans == 'clear':
             clear_screen()
         elif ans == 'preferences':
-            preferences()    
+            preferences()
         elif ans == 'exit':
             exit_program()
-        else: 
+        else:
             print(f"Unrecognized command: {ans}\n")
-        
+
         ans = input("\nHit enter to continue, or type a command.\n")
+
 
 def entry_format_set():
     """
@@ -251,65 +258,81 @@ def entry_format_set():
     ans = input("Enter the name of a format and the current\n"
     +"format will be switched to the specified format\n"
     +"ie: 'condensed_prompt' will switch to condensed format.\n\n")
-    if ans == "separate_prompt":
-        data[1]["entry_format"] = "separate_prompt"
-        with open('preferences.json', 'w') as file:
-            json.dump(data[1], file)
-        data[1] = load_dataset('preferences.json')
-        
-        print("Entry format successfully changed to separate prompt.\n")
-    elif ans == "condensed_prompt":
-        data[1]["entry_format"] = "condensed_prompt"
-        with open('preferences.json', 'w') as file:
-            json.dump(data[1], file)
-        data[1] = load_dataset('preferences.json')
-        print("Entry format successfully changed to condensed prompt.\n")
-    elif ans == "simplified_prompt":
-        data[1]["entry_format"] = "simplified_prompt"
-        with open('preferences.json', 'w') as file:
-            json.dump(data[1], file)
-        data[1] = load_dataset('preferences.json')
-        print("Entry format successfully changed to simplified prompt.\n")
+    while(True):
+        if ans == "separate_prompt":
+            data[1]["entry_format"] = "separate_prompt"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+
+            data[1] = load_dataset('preferences.json')
+            print("Entry format successfully changed to separate prompt.\n")
+            break
+        elif ans == "condensed_prompt":
+            data[1]["entry_format"] = "condensed_prompt"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+
+            data[1] = load_dataset('preferences.json')
+            print("Entry format successfully changed to condensed prompt.\n")
+            break
+        elif ans == "simplified_prompt":
+            data[1]["entry_format"] = "simplified_prompt"
+            with open('preferences.json', 'w') as file:
+                json.dump(data[1], file)
+
+            data[1] = load_dataset('preferences.json')
+            print("Entry format successfully changed to simplified prompt.\n")
+            break
+        else:
+            print("Unsupported format, please enter one of the available formats:")
+            formats_help()
 
 
 def log_time():
     output = [] # create empty list to store output
-    if data[1]["entry_format"] == "separate_prompt":
-        hrs = int(input("Hours: "))
-        mts = int(input("Minutes: "))
-        sec = int(input("Sec: "))
-        if data[1]['entry_confirmation'] == 'True':
-            print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
-            ans = input("Enter (y/n), type 'submit' to finish entry: \n")
-        else:
-            # if entry_confirmation is false, show a different prompt
-            ans = input("Type 'submit' to finish entry, or enter to continue.\n")
-        output = [hrs, mts, sec, ans] # store time, response to prompt
-    elif data[1]["entry_format"] == "condensed_prompt":
-        condensed = input("Enter in order 'hrs' 'min' 'sec'\n"
-        +"on a single line separated by spaces: ")
-        num_values = [int(s) for s in condensed.split() if s.isdigit()]
-        hrs = num_values[0]
-        mts = num_values[1]
-        sec = num_values[2]
-        if data[1]['entry_confirmation'] =='True':
-            print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
-            ans = input("Enter (y/n), type 'submit to finish entry: \n")
-        else:
-            ans = input("Type 'submit' to finish entry, or enter to continue.\n")
-        output = [hrs, mts, sec, ans]
-    elif data[1]["entry_format"] == "simplified_prompt":
-        hrs = 0
-        mts = int(input("Minutes: "))
-        sec = int(input("Seconds: "))
-        if data[1]['entry_confirmation'] == 'True':
-            print(f"{mts} minutes, and {sec} seconds, correct?")
-            ans = input("Enter (y/n), type 'submit' to finish entry: \n")
-        else:
-            # if entry_confirmation is false, show a different prompt
-            ans = input("Type 'submit' to finish entry, or enter to continue.\n")
-        output = [hrs, mts, sec, ans] # store time, response to prompt
-        
+    while(True):
+        try:
+            if data[1]["entry_format"] == "separate_prompt":
+                hrs = int(input("Hours: "))
+                mts = int(input("Minutes: "))
+                sec = int(input("Sec: "))
+                if data[1]['entry_confirmation'] == 'True':
+                    print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
+                    ans = input("Enter (y/n), type 'submit' to finish entry: \n")
+                else:
+                    # if entry_confirmation is false, show a different prompt
+                    ans = input("Type 'submit' to finish entry, or enter to continue.\n")
+                output = [hrs, mts, sec, ans] # store time, response to prompt
+                break
+            elif data[1]["entry_format"] == "condensed_prompt":
+                condensed = input("Enter in order 'hrs' 'min' 'sec'\n"
+                +"on a single line separated by spaces: ")
+                num_values = [int(s) for s in condensed.split() if s.isdigit()]
+                hrs = num_values[0]
+                mts = num_values[1]
+                sec = num_values[2]
+                if data[1]['entry_confirmation'] =='True':
+                    print(f"{hrs} hours, {mts} minutes, and {sec} seconds, correct?")
+                    ans = input("Enter (y/n), type 'submit to finish entry: \n")
+                else:
+                    ans = input("Type 'submit' to finish entry, or enter to continue.\n")
+                output = [hrs, mts, sec, ans]
+                break
+            elif data[1]["entry_format"] == "simplified_prompt":
+                hrs = 0
+                mts = int(input("Minutes: "))
+                sec = int(input("Seconds: "))
+                if data[1]['entry_confirmation'] == 'True':
+                    print(f"{mts} minutes, and {sec} seconds, correct?")
+                    ans = input("Enter (y/n), type 'submit' to finish entry: \n")
+                else:
+                    # if entry_confirmation is false, show a different prompt
+                    ans = input("Type 'submit' to finish entry, or enter to continue.\n")
+                    output = [hrs, mts, sec, ans] # store time, response to prompt
+                break
+        except ValueError:
+            print("Expecting integer values, please try again with a valid entry.")
+            continue
     return output
 
 
@@ -319,13 +342,13 @@ def add_to_total(entry: []):
     total[0] += entry[0]
     total[1] += entry[1]
     total[2] += entry[2]
-    time_sheet += (f"-> {entry[0]} hours, {entry[1]} minutes," 
+    time_sheet += (f"-> {entry[0]} hours, {entry[1]} minutes,"
     + f" {entry[2]} seconds\n")
-    
+
     # clear screen, print out current timesheet for user
     clear_screen()
     print(time_sheet)
-    print(f"Current Total: {total[0]} hours, {total[1]} minutes," 
+    print(f"Current Total: {total[0]} hours, {total[1]} minutes,"
     +f" {total[2]} seconds")
 
 
@@ -354,21 +377,22 @@ def submit_time(entry: []):
     global total, time_sheet
     print("Submitting...")
     sleep(1)
-    
+
     add_to_total(entry)
     format_time()
-    
-    time_sheet += (f"|# Total: {total[0]} hours, {total[1]} minutes," 
+
+    time_sheet += (f"|# Total: {total[0]} hours, {total[1]} minutes,"
     +f" {total[2]} seconds #|")
-    
+
     print(time_sheet)
     input("Press enter to continue.")
-     
+
     clear_screen()
 
-    
+
 def entry_sequence():
     global time_sheet, runtime, total, output_file, entry_mode
+    clear_screen() # clear the screen of any text for clarity
     if entry_mode == 1:
         set_filename()
         entry_mode = 0
@@ -385,6 +409,9 @@ def entry_sequence():
                 print("Discarding entry...")
                 sleep(1)
                 clear_screen()
+                print(time_sheet)
+                print(f"Current Total: {total[0]} hours, {total[1]} minutes,"
+                +f" {total[2]} seconds")
         else:
             if ans == 'submit':
                 submit_time(entry)
@@ -401,10 +428,10 @@ def reset_values():
     total = [0,0,0]
     time_sheet = "Entries: \n"
 
-            
+
 def save_entries():
     global output_file, runtime, entry_mode
-    
+
     # set directory to save finished timesheet to
     output_directory = os.getcwd()
     if data[1]['file_folder'] == "True":
@@ -421,20 +448,28 @@ def save_entries():
         else:
             print(f"{file_path} will be overwritten.")
 
-    # write recorded time to file using specified name                
+    # write recorded time to file using specified name
     with open(file_path, 'w') as file:
         file.write(time_sheet)
-        print(f"Entries saved to '{file_path}'\n")
-    
-    ans = input("Fill out another timesheet? (y/n)\n")
-    if ans.lower() != 'y':
-        exit_program()
-    else:
-        entry_mode = 1
-        reset_values()
-        clear_screen()
-        
-        
+        print(f"Entries saved to: \n'{file_path}'\n")
+
+
+    while(True):
+        ans = input("Fill out another timesheet? (y/n)\n")
+        if ans.lower() == 'n':
+            exit_program()
+        elif ans.lower() == 'y':
+            entry_mode = 1
+            reset_values()
+            clear_screen()
+            break
+        else:
+            print("Expecting 'y' or 'n'...\n")
+            sleep(2)
+            clear_screen()
+            continue
+
+
 def main():
     intro()
     while True:
@@ -444,4 +479,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
