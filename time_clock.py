@@ -121,7 +121,7 @@ def preferences():
         if ans == "file_folder true":
             data[1]['file_folder'] = "True"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
             # create output folder if it does not exist
@@ -129,37 +129,37 @@ def preferences():
         elif ans == "file_folder false":
             data[1]['file_folder'] = "False"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
         elif ans == "entry_confirmation true":
             data[1]['entry_confirmation'] = "True"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
         elif ans == "entry_confirmation false":
             data[1]['entry_confirmation'] = "False"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
         elif ans == "auto_txt false":
             data[1]["auto_txt"] = "False"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
         elif ans == "auto_txt true":
             data[1]["auto_txt"] = "True"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
         elif ans == "entry_format separate_prompt":
             data[1]["entry_format"] = "separate_prompt"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
             data[1] = load_dataset('preferences.json')
             print(format_json(data[1]))
         elif ans == "entry_format condensed_prompt":
@@ -288,7 +288,7 @@ def entry_format_set():
         if ans == "separate_prompt":
             data[1]["entry_format"] = "separate_prompt"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
 
             data[1] = load_dataset('preferences.json')
             print("Entry format successfully changed to separate prompt.\n")
@@ -296,7 +296,7 @@ def entry_format_set():
         elif ans == "condensed_prompt":
             data[1]["entry_format"] = "condensed_prompt"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
 
             data[1] = load_dataset('preferences.json')
             print("Entry format successfully changed to condensed prompt.\n")
@@ -304,7 +304,7 @@ def entry_format_set():
         elif ans == "simplified_prompt":
             data[1]["entry_format"] = "simplified_prompt"
             with open('preferences.json', 'w') as file:
-                json.dump(data[1], file)
+                json.dump(data[1], file, indent=2)
 
             data[1] = load_dataset('preferences.json')
             print("Entry format successfully changed to simplified prompt.\n")

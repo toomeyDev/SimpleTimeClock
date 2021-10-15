@@ -15,6 +15,7 @@ Preferences menu allows for configuration of various program settings,
 including:
 - Automatically append '.txt' to output files missing an extension
 - Save timesheet files to a separate 'output' folder
+- Insert date (year, month, day) before timesheet entries
 
 For a full list of supported preferences, use the command 'preferences'
 while the program is running.
