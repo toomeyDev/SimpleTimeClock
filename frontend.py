@@ -1,4 +1,8 @@
 import tkinter as tk
+from functools import partial
+
+# keep track of number of rows of entries
+row_count = 0
 
 def run():
     window = tk.Tk()
@@ -28,24 +32,32 @@ def run():
 
     # create entry widgets for time entry process
     frm_entry_indiv = tk.Frame(master=frm_entry)
-    # add individual entry widgets to the frame
-    lbl_hrs = tk.Label(master=frm_entry_indiv, text="Hours:")
-    ent_hrs = tk.Entry(master=frm_entry_indiv)
-    lbl_min = tk.Label(master=frm_entry_indiv, text="Minutes:")
-    ent_min = tk.Entry(master=frm_entry_indiv)
-    lbl_sec = tk.Label(master=frm_entry_indiv, text="Seconds:")
-    ent_sec = tk.Entry(master=frm_entry_indiv)
+    
+    def add_row(frame):
+        """Add a new row of entries to the frame."""
+        global row_count
+        row_count += 1
+        
+        # add individual entry widgets to the frame
+        lbl_hrs = tk.Label(master=frame, text="Hours:")
+        ent_hrs = tk.Entry(master=frame)
+        lbl_min = tk.Label(master=frame, text="Minutes:")
+        ent_min = tk.Entry(master=frame)
+        lbl_sec = tk.Label(master=frame, text="Seconds:")
+        ent_sec = tk.Entry(master=frame)
 
-    # layout individual entry widgets in the frame
-    lbl_hrs.grid(row=0, column=0)
-    ent_hrs.grid(row=0, column=1)
-    lbl_min.grid(row=0, column=2)
-    ent_min.grid(row=0, column=3)
-    lbl_sec.grid(row=0, column=4)
-    ent_sec.grid(row=0, column=5)
+        # layout individual entry widgets in the frame
+        lbl_hrs.grid(row=row_count, column=0)
+        ent_hrs.grid(row=row_count, column=1)
+        lbl_min.grid(row=row_count, column=2)
+        ent_min.grid(row=row_count, column=3)
+        lbl_sec.grid(row=row_count, column=4)
+        ent_sec.grid(row=row_count, column=5)
+
+    add_row(frm_entry_indiv) # add at least one row of entries at start
     
     # create button to handle adding new row of entries
-    btn_new_row = tk.Button(master=frm_entry, text="New Row")
+    btn_new_row = tk.Button(master=frm_entry, text="New Row", command=partial(add_row, frm_entry_indiv))
 
     # create frame to handle total time calculation
     frm_total = tk.Frame(master=frm_entry)
@@ -62,13 +74,13 @@ def run():
     lbl_total_sec.grid(row=0, column=3)
 
     # layout frm_entry level widgets inside frm_entry
-    frm_entry_indiv.grid(row=0, column=0)
+    frm_entry_indiv.grid(row=0, column=0, sticky="ns", padx=5)
     btn_new_row.grid(row=1, column=0)
     frm_total.grid(row=2, column=0)
 
     # add top-level widgets to main grid
     frm_buttons.grid(row=0, column=0, sticky="ns")
-    frm_entry.grid(row=0, column=1)
+    frm_entry.grid(row=0, column=1, sticky="ns")
 
     # Run the event loop
     window.mainloop()
