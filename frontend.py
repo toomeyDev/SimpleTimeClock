@@ -3,8 +3,9 @@ from functools import partial
 
 # keep track of number of rows of entries
 row_count = 0
+row_entries = [] # hold individual row entries for calculations in backend
 
-def run():
+def run(backend_module):
     window = tk.Tk()
     window.title("SimpleTimeClock")
 
@@ -29,22 +30,34 @@ def run():
     btn_load.grid(row=2, column=0, sticky="ew", padx=5)
     btn_settings.grid(row=3, column=0, sticky="ew", padx=5)
     btn_exit.grid(row=4, column=0, sticky="ew", padx=5)
-
-    # create entry widgets for time entry process
-    frm_entry_indiv = tk.Frame(master=frm_entry)
     
-    def add_row(frame):
+    # create a frame to hold row frames
+    frm_rows = tk.Frame(master=frm_entry)
+
+    def add_row():
+        # create empty frame to hold the row content
+        frm_entry_indiv = tk.Frame(master=frm_rows)
+        
         """Add a new row of entries to the frame."""
-        global row_count
+        global row_count, row_entries
         row_count += 1
         
         # add individual entry widgets to the frame
-        lbl_hrs = tk.Label(master=frame, text="Hours:")
-        ent_hrs = tk.Entry(master=frame)
-        lbl_min = tk.Label(master=frame, text="Minutes:")
-        ent_min = tk.Entry(master=frame)
-        lbl_sec = tk.Label(master=frame, text="Seconds:")
-        ent_sec = tk.Entry(master=frame)
+        lbl_hrs = tk.Label(master=frm_entry_indiv, text="Hours:")
+        ent_hrs = tk.Entry(master=frm_entry_indiv)
+        ent_hrs.insert(0, "0")
+        
+        lbl_min = tk.Label(master=frm_entry_indiv, text="Minutes:")
+        ent_min = tk.Entry(master=frm_entry_indiv)
+        ent_min.insert(0, "0")
+        
+        lbl_sec = tk.Label(master=frm_entry_indiv, text="Seconds:")
+        ent_sec = tk.Entry(master=frm_entry_indiv)
+        ent_sec.insert(0, "0")
+
+        # store all entry widgets in row_entries for use in calculations
+        row_contents = [ent_hrs, ent_min, ent_sec]
+        row_entries.append(row_contents)
 
         # layout individual entry widgets in the frame
         lbl_hrs.grid(row=row_count, column=0)
@@ -54,10 +67,24 @@ def run():
         lbl_sec.grid(row=row_count, column=4)
         ent_sec.grid(row=row_count, column=5)
 
-    add_row(frm_entry_indiv) # add at least one row of entries at start
+        # add the entries to the frm_rows grid as a new row
+        frm_entry_indiv.grid(row=row_count,column=0, sticky="ns", padx=5)
+
+    def clear_rows():
+        """Destroy all widgets in the rows section."""
+        for widget in frm_rows.winfo_children():
+            widget.destroy()
+        add_row() # add a single blank row
+
+    btn_clear.config(command=clear_rows)
+
+    add_row() # add at least one row of entries at start
     
     # create button to handle adding new row of entries
-    btn_new_row = tk.Button(master=frm_entry, text="New Row", command=partial(add_row, frm_entry_indiv))
+    btn_new_row = tk.Button(master=frm_entry, text="New Row", command=add_row)
+
+    # create button to handle calculation of time
+    btn_calculate = tk.Button(master=frm_entry, text="Calculate")
 
     # create frame to handle total time calculation
     frm_total = tk.Frame(master=frm_entry)
@@ -74,13 +101,18 @@ def run():
     lbl_total_sec.grid(row=0, column=3)
 
     # layout frm_entry level widgets inside frm_entry
-    frm_entry_indiv.grid(row=0, column=0, sticky="ns", padx=5)
-    btn_new_row.grid(row=1, column=0)
+    frm_rows.grid(row=0, column=0)
+    btn_new_row.grid(row=1, column=0, sticky="ew", padx=5)
+    btn_calculate.grid(row=1, column=1, sticky="ew",padx=5)
     frm_total.grid(row=2, column=0)
 
     # add top-level widgets to main grid
     frm_buttons.grid(row=0, column=0, sticky="ns")
     frm_entry.grid(row=0, column=1, sticky="ns")
+
+    for item in row_entries:
+        backend_module.get_row_info(item)
+            
 
     # Run the event loop
     window.mainloop()

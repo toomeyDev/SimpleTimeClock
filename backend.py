@@ -2,15 +2,20 @@ from os import system, name, makedirs
 import os
 from time import sleep
 from datetime import date
-from sys import exit, path
+from sys import exit
 import json
+from tkinter import Entry, Label
 
 output_file = 'timesheet.txt' # default file where entries will be stored as output
 total = [0,0,0] # total sum of all entries, stored in order of hours, minutes, seconds
 current_date = date.today() # store today's current date
-entry_mode = 0 # handles different operational modes for the entry prompt, 0 = don't prompt for filename,
 # 1 = prompt for filename
 
+
+def get_row_info(row):
+    """Return a list with the hours, minutes, and seconds of an individual row."""
+    row_info = [int(row[0].get()), int(row[1].get()), int(row[2].get())]
+    return row_info
 
 def load_dataset(data_path: str) :
     """
@@ -18,7 +23,6 @@ def load_dataset(data_path: str) :
     """
     json_file = open(data_path)
     return json.load(json_file)
-
 
 def format_json(json_file) :
     """Format a json file for easy legibility."""
@@ -46,51 +50,6 @@ def timesheet_setup():
         time_sheet += f"|Date recorded| -> {current_date}\n"
     time_sheet += "Entries: \n"
 
-
-# menu functionality (intro, set filename, display help, commands
-def intro():
-    """Introduce the user to program functionality, entry format."""
-    print("Welcome to TimeClock, a simple terminal application"
-    + " for recording time.\n")
-    print("You can add entries in hours, minutes, and seconds,")
-    print("when you are finished with entry, type 'submit'")
-    print("to see available entry formats, type 'formats-help'")
-    print("to set filename for saving timesheet, type 'filename-set'")
-    print("for a full list of available commands, type 'commands'")
-    print("To view and change program preferences, type 'preferences'")
-    print("to see this message again at any time, type 'intro'\n")
-
-
-def set_filename():
-    global output_file, entry_mode
-    """Set the filename where finished timesheet results will be saved."""
-    filename=input("Enter name for text output of new timesheet: \n"
-    +f"[Leave empty to reuse the current filename {output_file}]")
-    if filename == '':
-        filename = output_file
-
-    filename = txt_append(filename) # if auto_txt is true, append '.txt'
-    print(f"Entries will be written to {filename}.\n\n")
-    output_file = filename
-
-    """ reset entry mode if user manually changes filename during second timesheet
-    and later. """
-    if entry_mode == 1:
-        entry_mode = 0
-
-
-def txt_append(input_string: str):
-    """
-    Append '.txt' to the end of the provided string
-    if 'auto_txt' == True
-    """
-    if data[1]["auto_txt"] == "True":
-        if input_string.find('.txt') == -1:
-            input_string += '.txt'
-            return input_string
-    return input_string
-
-
 def reset_preferences():
     """Reset all user-preferences to default values."""
     print("\nResetting user preferences to default values...\n")
@@ -110,98 +69,8 @@ def preferences():
     Alter various preferences related to the program, including
     output location (save files)
     """
-    print(format_json(data[1]))
-    print("To change preferences, enter the name of a preference\n"
-    +"followed by 'true' or 'false', ie: file_folder true will\n"
-    +"set the file_folder option to true.\nType 'reset' to"
-    + " reset all preferences to default values.")
-    ans = None
-    while ans != "":
-        ans = input("\nType 'exit' to leave preference settings.\n").lower()
-        if ans == "file_folder true":
-            data[1]['file_folder'] = "True"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-            # create output folder if it does not exist
-            file_folder()
-        elif ans == "file_folder false":
-            data[1]['file_folder'] = "False"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "entry_confirmation true":
-            data[1]['entry_confirmation'] = "True"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "entry_confirmation false":
-            data[1]['entry_confirmation'] = "False"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "auto_txt false":
-            data[1]["auto_txt"] = "False"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "auto_txt true":
-            data[1]["auto_txt"] = "True"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "entry_format separate_prompt":
-            data[1]["entry_format"] = "separate_prompt"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "entry_format condensed_prompt":
-            data[1]["entry_format"] = "condensed_prompt"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "entry_format simplified_prompt":
-            data[1]["entry_format"] = "simplified_prompt"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "date_info_output false":
-            data[1]["date_info_output"] = "False"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "date_info_output true":
-            data[1]["date_info_output"] = "True"
-            with open('preferences.json', 'w') as file:
-                json.dump(data[1], file, indent=2)
-            data[1] = load_dataset('preferences.json')
-            print(format_json(data[1]))
-        elif ans == "reset":
-            reset_preferences()
-        elif ans == "exit":
-            print("Exiting preferences... \n")
-            clear_screen()
-            break
-
-
-def formats_help():
-    """
-    Display information about available formats and current format
-    settings for time entry.
-    """
-    with open('input_formats.txt') as file:
-        print(file.read())
-
+    # Needs to be reworked for GUI
+    return None
 
 def file_folder():
     """
@@ -213,15 +82,6 @@ def file_folder():
         if not os.path.exists('output'):
             makedirs('output')
     print(f"New output directory created at {os.path.abspath('output')}")
-
-
-def commands_list():
-    """
-    Display a list of available commands to the user from the
-    'commands.json' file.
-    """
-    print(format_json(data[0]))
-
 
 def clear_screen():
     """Clear the terminal/console of any generated text."""
@@ -240,38 +100,6 @@ def exit_program():
     sleep(1)
     exit()
 
-
-def menu_sequence():
-    """Handle user input commands and control-flow of initial menu."""
-    global entry_mode
-    timesheet_setup() # setup timesheet before time entry begins
-    if(entry_mode == 0):
-        ans = input("Hit enter to start a timesheet, or type a command.\n").lower()
-    else:
-        ans = input("Hit enter to start a new timesheet, or type a command.\n").lower()
-    while ans != '':
-        if ans == 'filename-set':
-            set_filename()
-        elif ans == 'formats-help':
-            formats_help()
-        elif ans == 'entry-format-set':
-            entry_format_set()
-        elif ans == 'intro':
-            intro()
-        elif ans == 'commands':
-            commands_list()
-        elif ans == 'clear':
-            clear_screen()
-        elif ans == 'preferences':
-            preferences()
-        elif ans == 'exit':
-            exit_program()
-        else:
-            print(f"Unrecognized command: {ans}\n")
-
-        ans = input("\nHit enter to continue, or type a command.\n")
-
-
 def entry_format_set():
     """
     Set the entry format (what values the user is prompted for when typing in
@@ -280,7 +108,6 @@ def entry_format_set():
     """
     print(f"Current format is {data[1]['entry_format']}.\n")
     print("Available formats include: \n")
-    formats_help()
     ans = input("Enter the name of a format and the current\n"
     +"format will be switched to the specified format\n"
     +"ie: 'condensed_prompt' will switch to condensed format.\n\n")
@@ -311,7 +138,6 @@ def entry_format_set():
             break
         else:
             print("Unsupported format, please enter one of the available formats:")
-            formats_help()
 
 
 def log_time():
@@ -362,7 +188,7 @@ def log_time():
     return output
 
 
-def add_to_total(entry: []):
+def add_to_total(entry):
     global total, time_sheet
     # add entered values to total
     total[0] += entry[0]
@@ -370,13 +196,6 @@ def add_to_total(entry: []):
     total[2] += entry[2]
     time_sheet += (f"-> {entry[0]} hours, {entry[1]} minutes,"
     + f" {entry[2]} seconds\n")
-
-    # clear screen, print out current timesheet for user
-    clear_screen()
-    print(time_sheet)
-    print(f"Current Total: {total[0]} hours, {total[1]} minutes,"
-    +f" {total[2]} seconds\n")
-
 
 def format_time():
     """
@@ -416,39 +235,6 @@ def submit_time(entry: []):
 
     clear_screen()
 
-
-def entry_sequence():
-    global time_sheet, runtime, total, output_file, entry_mode
-    clear_screen() # clear the screen of any text for clarity
-    if entry_mode == 1:
-        set_filename()
-        entry_mode = 0
-    while True:
-        entry = log_time() #entry[0]=hrs, entry[1]=mts, entry[2]=sec
-        ans = entry[-1] # store user response to validation prompt
-        if data[1]['entry_confirmation'] == 'True':
-            if ans == 'y':
-                add_to_total(entry)
-            elif ans == 'submit':
-                submit_time(entry)
-                break
-            else:
-                print("Discarding entry...")
-                sleep(1)
-                clear_screen()
-                print(time_sheet)
-                print(f"Current Total: {total[0]} hours, {total[1]} minutes,"
-                +f" {total[2]} seconds")
-        else:
-            if ans == 'submit':
-                submit_time(entry)
-                break
-            elif ans == '':
-                add_to_total(entry)
-            else:
-                print('Command not recognized, adding to total...\n')
-
-
 def reset_values():
     """Reset values necessary for running the program to initial state."""
     global total, time_sheet
@@ -470,7 +256,6 @@ def save_entries():
         ans=input(f"Are you sure you want to overwrite the file {file_path}?\n")
         if ans.lower() == 'n' or ans.lower() == 'no':
             output_file = input("Choose an alternate filename for output: ")
-            output_file = txt_append(output_file) # if auto_txt is true, append '.txt'
             file_path = os.path.join(output_directory, output_file)
         else:
             print(f"{file_path} will be overwritten.")
@@ -495,14 +280,3 @@ def save_entries():
             sleep(2)
             clear_screen()
             continue
-
-
-def main():
-    intro()
-    while True:
-        menu_sequence()
-        entry_sequence()
-        save_entries()
-
-if __name__ == '__main__':
-    main()
