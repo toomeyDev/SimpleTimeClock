@@ -17,6 +17,34 @@ def get_row_info(row):
     row_info = [int(row[0].get()), int(row[1].get()), int(row[2].get())]
     return row_info
 
+def format_time(total):
+    """
+    Format the current total values, converting values
+    greater than or equal to 60 to their equivalent larger
+    time denominations (ie: 120 seconds becomes 2 minutes,
+    180 minutes becomes three hours and so on).
+    """
+    index = 0
+    for item in total:
+        if item / 60 >= 1 and index != 0:
+            item_remainder = item % 60
+            quotient = int(item / 60)
+            total[index - 1] += quotient
+            total[index] = item_remainder
+        index += 1
+    print(total)
+
+def calculate_total(entries):
+    """Add up each individual total for hours, minutes, and seconds to get current total time."""
+    total = [0, 0, 0]
+    for entry in entries:
+        row = get_row_info(entry)
+        total[0] += row[0] # add hours to total
+        total[1] += row[1] # add minutes to total
+        total[2] += row[2] # add seconds to total
+    total = format_time(total) # format total
+    return total
+
 def load_dataset(data_path: str) :
     """
     Load the json object at specified path into data.
@@ -196,23 +224,6 @@ def add_to_total(entry):
     total[2] += entry[2]
     time_sheet += (f"-> {entry[0]} hours, {entry[1]} minutes,"
     + f" {entry[2]} seconds\n")
-
-def format_time():
-    """
-    Format the current total values, converting values
-    greater than or equal to 60 to their equivalent larger
-    time denominations (ie: 120 seconds becomes 2 minutes,
-    180 minutes becomes three hours and so on).
-    """
-    index = 0
-    for item in total:
-        if item / 60 >= 1 and index != 0:
-            item_remainder = item % 60
-            quotient = int(item / 60)
-            total[index - 1] += quotient
-            total[index] = item_remainder
-        index += 1
-
 
 def submit_time(entry: []):
     """

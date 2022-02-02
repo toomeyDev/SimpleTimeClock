@@ -108,11 +108,7 @@ def run(backend_module):
 
     # add top-level widgets to main grid
     frm_buttons.grid(row=0, column=0, sticky="ns")
-    frm_entry.grid(row=0, column=1, sticky="ns")
-
-    for item in row_entries:
-        backend_module.get_row_info(item)
-            
+    frm_entry.grid(row=0, column=1, sticky="ns")    
 
     # Run the event loop
     window.mainloop()
