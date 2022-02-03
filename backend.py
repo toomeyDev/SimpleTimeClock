@@ -32,7 +32,7 @@ def format_time(total):
             total[index - 1] += quotient
             total[index] = item_remainder
         index += 1
-    print(total)
+    return total
 
 def calculate_total(entries):
     """Add up each individual total for hours, minutes, and seconds to get current total time."""

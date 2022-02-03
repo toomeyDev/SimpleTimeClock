@@ -1,5 +1,8 @@
 import tkinter as tk
 from functools import partial
+from xml.dom.minidom import TypeInfo
+
+from backend import calculate_total
 
 # keep track of number of rows of entries
 row_count = 0
@@ -74,6 +77,11 @@ def run(backend_module):
         """Destroy all widgets in the rows section."""
         for widget in frm_rows.winfo_children():
             widget.destroy()
+            # reset related values
+            global row_entries, row_count
+            row_entries = []
+            row_count = 0
+
         add_row() # add a single blank row
 
     btn_clear.config(command=clear_rows)
@@ -99,6 +107,18 @@ def run(backend_module):
     lbl_total_hrs.grid(row=0, column=1)
     lbl_total_min.grid(row=0, column=2)
     lbl_total_sec.grid(row=0, column=3)
+
+    def assign_totals():
+        """
+        Assign calculated total values for hours, minutes, and seconds
+        to the corresponding labels in frm_total.
+        """
+        total_values = backend_module.calculate_total(row_entries)
+        lbl_total_hrs['text'] = f"Hours: {total_values[0]}"
+        lbl_total_min['text'] = f"Minutes: {total_values[1]}"
+        lbl_total_sec['text'] = f"Seconds: {total_values[2]}"
+
+    btn_calculate.config(command=assign_totals)
 
     # layout frm_entry level widgets inside frm_entry
     frm_rows.grid(row=0, column=0)
