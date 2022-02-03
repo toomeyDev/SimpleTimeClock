@@ -3,5 +3,5 @@ Simple utility for tracking time spent engaged in an actitity, working, timekeep
 
 Features a simple UI built with the cross-platform Tkinter framework in Python.
 
-![image](https://github.com/toomeyDev/SimpleTimeClock/blob/main/simpletimeclock-screenshot1.png?raw=true)
+![image](https://user-images.githubusercontent.com/75909182/152266073-012136d2-4aa4-43b6-92c8-438379585250.png)
 <hr>
