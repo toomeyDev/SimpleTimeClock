@@ -14,8 +14,15 @@ current_date = date.today() # store today's current date
 
 def get_row_info(row):
     """Return a list with the hours, minutes, and seconds of an individual row."""
-    row_info = [int(row[0].get()), int(row[1].get()), int(row[2].get())]
-    return row_info
+    try:
+        row_info = [int(row[0].get()), int(row[1].get()), int(row[2].get())]
+        return row_info
+    except(ValueError):
+        print("Expecting integer values.")
+        # if invalid values detected, fill in with empty (0) entries
+        row_info = [0, 0, 0]
+    finally:
+        return row_info
 
 def format_time(total):
     """
