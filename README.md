@@ -1,7 +1,5 @@
 # SimpleTimeClock
-A basic Tkinter based utility for recording hours, minutes, and seconds,
-built with Python 3.
+Simple utility for tracking time spent engaged in an actitity, working, timekeeping etc.
 
-Useful for logging the amount of time worked or spent engaging in some activity,
-timekeeping etc.
+Features a simple UI built with the cross-platform Tkinter framework in Python.
 <hr>
