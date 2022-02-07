@@ -1,6 +1,6 @@
 import tkinter as tk
 from functools import partial
-from tkinter.filedialog import asksaveasfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 from xml.dom.minidom import TypeInfo
 
 # keep track of number of rows of entries
@@ -72,6 +72,42 @@ def run(backend_module):
         # add the entries to the frm_rows grid as a new row
         frm_entry_indiv.grid(row=row_count,column=0, sticky="ns", padx=5)
 
+    def add_total_row(total):
+        # create empty frame to hold the row content
+        frm_entry_indiv = tk.Frame(master=frm_rows)
+        
+        """Add a new row of entries to the frame."""
+        global row_count, row_entries
+        row_count += 1
+        
+        # add individual entry widgets to the frame
+        lbl_hrs = tk.Label(master=frm_entry_indiv, text="Hours:")
+        ent_hrs = tk.Entry(master=frm_entry_indiv)
+        ent_hrs.insert(0, total[0])
+        
+        lbl_min = tk.Label(master=frm_entry_indiv, text="Minutes:")
+        ent_min = tk.Entry(master=frm_entry_indiv)
+        ent_min.insert(0, total[1])
+        
+        lbl_sec = tk.Label(master=frm_entry_indiv, text="Seconds:")
+        ent_sec = tk.Entry(master=frm_entry_indiv)
+        ent_sec.insert(0, total[2])
+
+        # store all entry widgets in row_entries for use in calculations
+        row_contents = [ent_hrs, ent_min, ent_sec]
+        row_entries.append(row_contents)
+
+        # layout individual entry widgets in the frame
+        lbl_hrs.grid(row=row_count, column=0)
+        ent_hrs.grid(row=row_count, column=1)
+        lbl_min.grid(row=row_count, column=2)
+        ent_min.grid(row=row_count, column=3)
+        lbl_sec.grid(row=row_count, column=4)
+        ent_sec.grid(row=row_count, column=5)
+
+        # add the entries to the frm_rows grid as a new row
+        frm_entry_indiv.grid(row=row_count,column=0, sticky="ns", padx=5)
+
     def clear_rows():
         """Destroy all widgets in the rows section."""
         for widget in frm_rows.winfo_children():
@@ -82,6 +118,8 @@ def run(backend_module):
             row_count = 0
 
         add_row() # add a single blank row
+        assign_totals() # assign the new empty total
+        window.title("SimpleTimeClock")
 
     btn_clear.config(command=clear_rows)
 
@@ -135,8 +173,44 @@ def run(backend_module):
             
         window.title(f"SimpleTimeClock - {savepath}")
 
-    btn_save.config(command = save_total)
+    def load_total():
+        """
+        Load a pre-existing timesheet into the program
+        keeping track of the prior total in the first row.
+        """
+        timesheet_path = askopenfilename(
+            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
+        )
+        if not timesheet_path:
+            return
+
+        for widget in frm_rows.winfo_children():
+            widget.destroy()
+            # reset related values
+            global row_entries, row_count
+            row_entries = []
+            row_count = 0
+
+        row_total = ""
+        with open(timesheet_path, "r") as input:
+            input.readline()
+            row_total = input.readline().split()
+        for word in row_total:
+            if word.isnumeric():
+                continue
+            else:
+                # remove any non-numeric content
+                row_total.remove(word)
+        total = [row_total[0], row_total[1], row_total[2]]
+        add_total_row(total) # add the prior total to the top of an empty sheet
+        assign_totals()
+
+        window.title(f"SimpleTimeClock - {timesheet_path}")
+
+
+    btn_save.config(command=save_total)
     btn_calculate.config(command=assign_totals)
+    btn_load.config(command=load_total)
 
     # layout frm_entry level widgets inside frm_entry
     frm_rows.grid(row=0, column=0)
