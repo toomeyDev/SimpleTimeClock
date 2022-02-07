@@ -134,10 +134,10 @@ def run(backend_module):
     # create frame to handle total time calculation
     frm_total = tk.Frame(master=frm_entry)
     # add individual total widgets to the frame
-    lbl_total = tk.Label(master=frm_total, text="Total:")
-    lbl_total_hrs = tk.Label(master=frm_total, text="Hours: 0")
-    lbl_total_min = tk.Label(master=frm_total, text="Minutes: 0")
-    lbl_total_sec = tk.Label(master=frm_total, text="Seconds: 0")
+    lbl_total = tk.Label(master=frm_total, text="Total \N{RIGHTWARDS BLACK ARROW}")
+    lbl_total_hrs = tk.Label(master=frm_total, text="0 Hours,")
+    lbl_total_min = tk.Label(master=frm_total, text="0 Minutes,")
+    lbl_total_sec = tk.Label(master=frm_total, text="0 Seconds")
 
     # layout frm_total level widgets inside frm_total
     lbl_total.grid(row=0, column = 0)
@@ -151,9 +151,9 @@ def run(backend_module):
         to the corresponding labels in frm_total.
         """
         total_values = backend_module.calculate_total(row_entries)
-        lbl_total_hrs['text'] = f"Hours: {total_values[0]}"
-        lbl_total_min['text'] = f"Minutes: {total_values[1]}"
-        lbl_total_sec['text'] = f"Seconds: {total_values[2]}"
+        lbl_total_hrs['text'] = f"{total_values[0]} Hours,"
+        lbl_total_min['text'] = f"{total_values[1]} Minutes,"
+        lbl_total_sec['text'] = f"{total_values[2]} Seconds"
 
     def save_total():
         """
