@@ -1,8 +1,7 @@
 import tkinter as tk
 from functools import partial
+from tkinter.filedialog import asksaveasfilename
 from xml.dom.minidom import TypeInfo
-
-from backend import calculate_total
 
 # keep track of number of rows of entries
 row_count = 0
@@ -118,6 +117,25 @@ def run(backend_module):
         lbl_total_min['text'] = f"Minutes: {total_values[1]}"
         lbl_total_sec['text'] = f"Seconds: {total_values[2]}"
 
+    def save_total():
+        """
+        Save the calculated total for hours, minutes, and seconds
+        to a text file for future viewing/loading.
+        """
+        total = backend_module.calculate_total(row_entries)
+        savepath = asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
+        )
+        if not savepath:
+            return
+        with open(savepath, "w") as output:
+            output.write("Total Time:\n")
+            output.write(f"{str(total[0])} hours, {str(total[1])} minutes, {str(total[2])} seconds")
+            
+        window.title(f"SimpleTimeClock - {savepath}")
+
+    btn_save.config(command = save_total)
     btn_calculate.config(command=assign_totals)
 
     # layout frm_entry level widgets inside frm_entry
