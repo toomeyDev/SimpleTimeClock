@@ -1,5 +1,5 @@
 import backend, frontend
-print("boot main.py")
+print("Boot application | main.py")
 
 def main():
     frontend.run(backend)
