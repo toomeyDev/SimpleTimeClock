@@ -3,7 +3,6 @@ import os
 from time import sleep
 from datetime import date
 from sys import exit
-import json
 from tkinter import Entry, Label
 
 current_date = date.today() # store today's current date
@@ -50,53 +49,6 @@ def calculate_total(entries):
     total = format_time(total) # format total
     return total
 
-# def save_entries():
-    
-
-def load_dataset(data_path: str) :
-    """
-    Load the json object at specified path into data.
-    """
-    json_file = open(data_path)
-    return json.load(json_file)
-
-
-def format_json(json_file) :
-    """Format a json file for easy legibility."""
-    output = ""
-    for key, value in json_file.items():
-        if(key == "Available Commands" or key == "Preferences"):
-            output += (f"\n{key}:\n")
-            continue
-        output +=(f"-> {key} | {value}\n")
-    return output
-
-
-data = [load_dataset('commands.json')] # hold different json files for access during runtime
-data.append(load_dataset('preferences.json'))
-
-time_sheet = "" # empty string to hold timesheet output
-
-
-def preferences():
-    """
-    Alter various preferences related to the program, including
-    output location (save files)
-    """
-    # Needs to be reworked for GUI
-    return None
-
-
-def file_folder():
-    """
-    Create a diectory for storing timesheet output if it doesn't
-    exist, and toggle the use of this directory if user changes
-    'file_folder' preference to false.
-    """
-    # Needs to be reworked for GUI
-    return None
-
-
 def clear_screen():
     """Clear the terminal/console of any generated text."""
     # make use of 'cls' command to clear screen in Windows
@@ -113,9 +65,3 @@ def exit_program():
     print("Terminating program...")
     sleep(1)
     exit()
-
-
-def save_entries():
-    global output_file, runtime, entry_mode
-    #Needs to be reworked for GUI
-    return None
