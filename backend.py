@@ -10,7 +10,6 @@ def get_row_info(row):
     """Return a list with the hours, minutes, and seconds of an individual row."""
     try:
         row_info = [int(row[0].get()), int(row[1].get()), int(row[2].get())]
-        print(row_info)
         return row_info
     except(ValueError):
         print("Error, expecting integer values.")

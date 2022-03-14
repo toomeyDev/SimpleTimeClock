@@ -1,8 +1,5 @@
-from sys import maxsize
 import tkinter as tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
-
-from backend import calculate_total
 
 class Frontend(tk.Tk):
     def __init__(self, backend):
@@ -22,7 +19,7 @@ class Frontend(tk.Tk):
         self.frm_buttons = tk.Frame(self, borderwidth=1, relief=tk.RIDGE)
         self.btn_clear = tk.Button(self.frm_buttons, text="Clear", command=self.clear_rows)
         self.btn_save = tk.Button(self.frm_buttons, text="Save", command=self.save_total)
-        self.btn_load = tk.Button(self.frm_buttons, text="Load")
+        self.btn_load = tk.Button(self.frm_buttons, text="Load", command=self.load_total)
         self.btn_settings = tk.Button(self.frm_buttons, text="Settings")
         self.btn_exit = tk.Button(master=self.frm_buttons, text="Exit", command=self.destroy)
 
@@ -137,7 +134,6 @@ class Frontend(tk.Tk):
         Assign calculated total values for hours, minutes, and seconds
         to the corresponding labels in frm_total.
         """
-        print(self.row_entries)
         self.total_values = self.backend.calculate_total(self.row_entries)
         self.lbl_total_hrs['text'] = f"{self.total_values[0]} Hours,"
         self.lbl_total_min['text'] = f"{self.total_values[1]} Minutes,"
@@ -160,3 +156,70 @@ class Frontend(tk.Tk):
             output.write(f"{str(total[0])} hours, {str(total[1])} minutes, {str(total[2])} seconds")
             
         self.title(f"SimpleTimeClock - {savepath}")
+
+    def add_total_row(self, total):
+        # create empty frame to hold the row content
+        frm_entry_indiv = tk.Frame(self.scrollable_frame)
+        
+        """Add a new row of entries to the frame."""
+        self.row_count += 1
+        
+        # add individual entry widgets to the frame
+        lbl_hrs = tk.Label(frm_entry_indiv, text="Hours:")
+        ent_hrs = tk.Entry(frm_entry_indiv, width=5)
+        ent_hrs.insert(0, total[0])
+        
+        lbl_min = tk.Label(frm_entry_indiv, text="Minutes:")
+        ent_min = tk.Entry(frm_entry_indiv, width=5)
+        ent_min.insert(0, total[1])
+        
+        lbl_sec = tk.Label(frm_entry_indiv, text="Seconds:")
+        ent_sec = tk.Entry(frm_entry_indiv, width=5)
+        ent_sec.insert(0, total[2])
+
+        # store all entry widgets in row_entries for use in calculations
+        row_contents = [ent_hrs, ent_min, ent_sec]
+        self.row_entries.append(row_contents)
+
+        # layout individual entry widgets in the frame
+        lbl_hrs.grid(row=self.row_count, column=0)
+        ent_hrs.grid(row=self.row_count, column=1)
+        lbl_min.grid(row=self.row_count, column=2)
+        ent_min.grid(row=self.row_count, column=3)
+        lbl_sec.grid(row=self.row_count, column=4)
+        ent_sec.grid(row=self.row_count, column=5)
+
+        # add the entries to the frm_rows grid as a new row
+        frm_entry_indiv.grid(row=self.row_count,column=0, sticky="ns", padx=5)
+
+    def load_total(self):
+        """
+        Load a pre-existing timesheet into the program
+        keeping track of the prior total in the first row.
+        """
+        timesheet_path = askopenfilename(
+            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
+        )
+        if not timesheet_path:
+            return
+
+        for widget in self.scrollable_frame.winfo_children():
+            widget.destroy()
+            # reset related values
+            self.row_entries = []
+            self.row_count = 0
+
+        self.totals = []
+        with open(timesheet_path, "r") as input:
+            input.readline()
+            read_total = input.readline().split()
+        for word in read_total:
+            if word.isnumeric():
+                self.totals.append(int(word))
+            else:
+                # remove any non-numeric content
+                continue
+        self.add_total_row(self.totals) # add the prior total to the top of an empty sheet
+        self.assign_totals()
+
+        self.title(f"SimpleTimeClock - {timesheet_path}")
