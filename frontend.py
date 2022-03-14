@@ -1,7 +1,6 @@
 import tkinter as tk
-from functools import partial
 from tkinter.filedialog import askopenfilename, asksaveasfilename
-from xml.dom.minidom import TypeInfo
+
 
 # keep track of number of rows of entries
 row_count = 0
