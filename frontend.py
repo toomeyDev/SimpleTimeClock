@@ -11,9 +11,12 @@ class Frontend(tk.Tk):
 
         self.backend = backend # hold reference to backend module
 
+        # adjust appearance of window
         self.title("SimpleTimeClock")
-        self.rowconfigure(0, minsize= 400)
-        self.columnconfigure(1, minsize=800)
+
+        # initial size
+        self.rowconfigure(0, minsize= 300)
+        self.columnconfigure(1, minsize=600)
 
         # widgets to handle function buttons area
         self.frm_buttons = tk.Frame(self, borderwidth=1, relief=tk.RIDGE)
@@ -33,9 +36,10 @@ class Frontend(tk.Tk):
         self.frm_buttons.grid(row=0, column=0, sticky="ns")
 
         # widgets to handle scrollable entry area
-        self.canvas_container = tk.Frame(self)
+        self.canvas_container = tk.Frame(self, relief=tk.RIDGE, borderwidth=1)
         self.canvas = tk.Canvas(self.canvas_container)
-        self.scrollbar = tk.Scrollbar(self.canvas_container, orient="vertical", command=self.canvas.yview)
+        self.frm_scrollbar = tk.Frame(self.canvas_container, borderwidth=1, relief=tk.RIDGE, background="#c9c8c3")
+        self.scrollbar = tk.Scrollbar(self.frm_scrollbar, orient="vertical", command=self.canvas.yview, bd=2, activebackground="black")
         self.scrollable_frame = tk.Frame(self.canvas)
 
         # recalculate canvas area when new widgets are added
@@ -50,23 +54,31 @@ class Frontend(tk.Tk):
         self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="center")
         self.canvas.configure(yscrollcommand=self.scrollbar.set)  
 
-        self.canvas_container.grid(row=0, column=1)
-        self.canvas.grid(row=0, column=0, sticky="ns")
-        self.scrollbar.grid(row=0, column=1)
+        self.canvas_container.grid(row=0, column=1, sticky="w", padx=10)
+        self.canvas.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+        self.frm_scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        # center scrollbar in scrollbar container
+        self.frm_scrollbar.rowconfigure(0, weight=0)
+        self.frm_scrollbar.rowconfigure(1, weight=1)
+        self.frm_scrollbar.rowconfigure(2, weight=0)
+
+        self.scrollbar.grid(row=1, column=0, padx=2)
+
 
         self.add_row() # add a single row by-default
 
         # widgets to handle entry-controls (add new, calculate, get total)
-        self.frm_entry_controls = tk.Frame(self)
-        self.btn_new_row = tk.Button(self.frm_entry_controls, text="New Row", command=self.add_row)
-        self.btn_calculate = tk.Button(self.frm_entry_controls, text="Calculate", command=self.assign_totals)
+        self.frm_entry_controls = tk.Frame(self, relief=tk.RIDGE, borderwidth=1)
+        self.btn_new_row = tk.Button(self.frm_entry_controls, text="New Row", command=self.add_row, width=22)
+        self.btn_calculate = tk.Button(self.frm_entry_controls, text="Calculate", command=self.assign_totals, width=22)
         
         # hold labels and output for total calculations
         self.frm_total = tk.Frame(self.frm_entry_controls)
         
         self.lbl_total_hrs = tk.Label(self.frm_total, text="0 Hours,")
         self.lbl_total_min = tk.Label(self.frm_total, text="0 Minutes,")
-        self.lbl_total_sec = tk.Label(self.frm_total, text="0 Seconds,")
+        self.lbl_total_sec = tk.Label(self.frm_total, text="0 Seconds")
 
         # add total output labels to frm_total grid
         self.lbl_total_hrs.grid(row=0, column=0)
@@ -76,9 +88,9 @@ class Frontend(tk.Tk):
         # add entry control widgets to frame
         self.btn_new_row.grid(row=0, column=0)
         self.btn_calculate.grid(row=0, column=1)
-        self.frm_total.grid(row=1, column=0)
-
-        self.frm_entry_controls.grid(row=1, column=1)
+        self.frm_total.grid(row=1, column=0,columnspan=2)
+        
+        self.frm_entry_controls.grid(row=1, column=1, sticky="w")
 
     def add_row(self):
         # create empty frame to hold the row content
@@ -114,7 +126,7 @@ class Frontend(tk.Tk):
         ent_sec.grid(row=self.row_count, column=5)
 
         # add the entries to the scrollable_frame grid as a new row
-        frm_entry_indiv.grid(row=self.row_count,column=0, sticky="ns", padx=5)
+        frm_entry_indiv.grid(row=self.row_count,column=0, sticky="ew", padx=5)
 
     def clear_rows(self):
         """Destroy all widgets in the rows section."""

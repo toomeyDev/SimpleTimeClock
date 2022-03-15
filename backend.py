@@ -1,5 +1,4 @@
 from os import system, name
-import os
 from time import sleep
 from datetime import date
 from sys import exit
