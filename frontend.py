@@ -1,165 +1,162 @@
 import tkinter as tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
+class Frontend(tk.Tk):
+    def __init__(self, backend):
+        super().__init__()
 
-# keep track of number of rows of entries
-row_count = 0
-row_entries = [] # hold individual row entries for calculations in backend
+        self.row_count = 0 # keep track of number of rows
+        self.row_entries = [] # hold all current row-entries in the program
+        self.total_values = [0, 0, 0] # keep track of running total values for h/m/s
 
-def run(backend_module):
-    window = tk.Tk()
-    window.title("SimpleTimeClock")
+        self.backend = backend # hold reference to backend module
 
-    window.rowconfigure(0, minsize= 200)
-    window.columnconfigure(1, minsize=400)
+        # adjust appearance of window
+        self.title("SimpleTimeClock")
 
-    # frame to contain function buttons
-    frm_buttons = tk.Frame(master=window, borderwidth=1, relief=tk.RIDGE)
-    # frame to contain entries
-    frm_entry = tk.Frame(master=window, borderwidth=1, relief=tk.RIDGE)
-    
-    # create function buttons and assign commands
-    btn_clear = tk.Button(master=frm_buttons, text="Clear")
-    btn_save = tk.Button(master=frm_buttons, text="Save")
-    btn_load = tk.Button(master=frm_buttons, text="Load")
-    btn_settings = tk.Button(master=frm_buttons, text="Settings")
-    btn_exit = tk.Button(master=frm_buttons, text="Exit", command=window.destroy)
+        # initial size
+        self.rowconfigure(0, minsize= 300)
+        self.columnconfigure(1, minsize=600)
 
-    # add function buttons to frm_buttons grid
-    btn_clear.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-    btn_save.grid(row=1, column=0, sticky="ew", padx=5)
-    btn_load.grid(row=2, column=0, sticky="ew", padx=5)
-    btn_settings.grid(row=3, column=0, sticky="ew", padx=5)
-    btn_exit.grid(row=4, column=0, sticky="ew", padx=5)
-    
-    # create a frame to hold row frames
-    frm_rows = tk.Frame(master=frm_entry)
+        # widgets to handle function buttons area
+        self.frm_buttons = tk.Frame(self, borderwidth=1, relief=tk.RIDGE)
+        self.btn_clear = tk.Button(self.frm_buttons, text="Clear", command=self.clear_rows)
+        self.btn_save = tk.Button(self.frm_buttons, text="Save", command=self.save_total)
+        self.btn_load = tk.Button(self.frm_buttons, text="Load", command=self.load_total)
+        self.btn_settings = tk.Button(self.frm_buttons, text="Settings")
+        self.btn_exit = tk.Button(master=self.frm_buttons, text="Exit", command=self.destroy)
 
-    def add_row():
+        # add function buttons to buttons frame
+        self.btn_clear.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+        self.btn_save.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        self.btn_load.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+        self.btn_settings.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
+        self.btn_exit.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
+
+        self.frm_buttons.grid(row=0, column=0, sticky="ns")
+
+        # widgets to handle scrollable entry area
+        self.canvas_container = tk.Frame(self, relief=tk.RIDGE, borderwidth=1)
+        self.canvas = tk.Canvas(self.canvas_container)
+        self.frm_scrollbar = tk.Frame(self.canvas_container, borderwidth=1, relief=tk.RIDGE, background="#c9c8c3")
+        self.scrollbar = tk.Scrollbar(self.frm_scrollbar, orient="vertical", command=self.canvas.yview, bd=2, activebackground="black")
+        self.scrollable_frame = tk.Frame(self.canvas)
+
+        # recalculate canvas area when new widgets are added
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: 
+                self.canvas.configure(
+                scrollregion=self.canvas.bbox("all"))
+        )
+
+        # configure canvas for scrolling entries
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="center")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)  
+
+        self.canvas_container.grid(row=0, column=1, sticky="w", padx=10)
+        self.canvas.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+        self.frm_scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        # center scrollbar in scrollbar container
+        self.frm_scrollbar.rowconfigure(0, weight=0)
+        self.frm_scrollbar.rowconfigure(1, weight=1)
+        self.frm_scrollbar.rowconfigure(2, weight=0)
+
+        self.scrollbar.grid(row=1, column=0, padx=2)
+
+
+        self.add_row() # add a single row by-default
+
+        # widgets to handle entry-controls (add new, calculate, get total)
+        self.frm_entry_controls = tk.Frame(self, relief=tk.RIDGE, borderwidth=1)
+        self.btn_new_row = tk.Button(self.frm_entry_controls, text="New Row", command=self.add_row, width=22)
+        self.btn_calculate = tk.Button(self.frm_entry_controls, text="Calculate", command=self.assign_totals, width=22)
+        
+        # hold labels and output for total calculations
+        self.frm_total = tk.Frame(self.frm_entry_controls)
+        
+        self.lbl_total_hrs = tk.Label(self.frm_total, text="0 Hours,")
+        self.lbl_total_min = tk.Label(self.frm_total, text="0 Minutes,")
+        self.lbl_total_sec = tk.Label(self.frm_total, text="0 Seconds")
+
+        # add total output labels to frm_total grid
+        self.lbl_total_hrs.grid(row=0, column=0)
+        self.lbl_total_min.grid(row=0, column=1)
+        self.lbl_total_sec.grid(row=0, column=2)
+
+        # add entry control widgets to frame
+        self.btn_new_row.grid(row=0, column=0)
+        self.btn_calculate.grid(row=0, column=1)
+        self.frm_total.grid(row=1, column=0,columnspan=2)
+        
+        self.frm_entry_controls.grid(row=1, column=1, sticky="w")
+
+    def add_row(self):
         # create empty frame to hold the row content
-        frm_entry_indiv = tk.Frame(master=frm_rows)
-        
+        frm_entry_indiv = tk.Frame(self.scrollable_frame, relief=tk.RIDGE, borderwidth=1)
+            
         """Add a new row of entries to the frame."""
-        global row_count, row_entries
-        row_count += 1
-        
+            
+        self.row_count += 1
+            
         # add individual entry widgets to the frame
-        lbl_hrs = tk.Label(master=frm_entry_indiv, text="Hours:")
-        ent_hrs = tk.Entry(master=frm_entry_indiv)
+        lbl_hrs = tk.Label(frm_entry_indiv, text="Hours:")
+        ent_hrs = tk.Entry(frm_entry_indiv, width=5)
         ent_hrs.insert(0, "0")
-        
-        lbl_min = tk.Label(master=frm_entry_indiv, text="Minutes:")
-        ent_min = tk.Entry(master=frm_entry_indiv)
+            
+        lbl_min = tk.Label(frm_entry_indiv, text="Minutes:")
+        ent_min = tk.Entry(frm_entry_indiv, width=5)
         ent_min.insert(0, "0")
-        
-        lbl_sec = tk.Label(master=frm_entry_indiv, text="Seconds:")
-        ent_sec = tk.Entry(master=frm_entry_indiv)
+            
+        lbl_sec = tk.Label(frm_entry_indiv, text="Seconds:")
+        ent_sec = tk.Entry(frm_entry_indiv, width=5)
         ent_sec.insert(0, "0")
 
         # store all entry widgets in row_entries for use in calculations
         row_contents = [ent_hrs, ent_min, ent_sec]
-        row_entries.append(row_contents)
+        self.row_entries.append(row_contents)
 
         # layout individual entry widgets in the frame
-        lbl_hrs.grid(row=row_count, column=0)
-        ent_hrs.grid(row=row_count, column=1)
-        lbl_min.grid(row=row_count, column=2)
-        ent_min.grid(row=row_count, column=3)
-        lbl_sec.grid(row=row_count, column=4)
-        ent_sec.grid(row=row_count, column=5)
+        lbl_hrs.grid(row=self.row_count, column=0)
+        ent_hrs.grid(row=self.row_count, column=1)
+        lbl_min.grid(row=self.row_count, column=2)
+        ent_min.grid(row=self.row_count, column=3)
+        lbl_sec.grid(row=self.row_count, column=4)
+        ent_sec.grid(row=self.row_count, column=5)
 
-        # add the entries to the frm_rows grid as a new row
-        frm_entry_indiv.grid(row=row_count,column=0, sticky="ns", padx=5)
+        # add the entries to the scrollable_frame grid as a new row
+        frm_entry_indiv.grid(row=self.row_count,column=0, sticky="ew", padx=5)
 
-    def add_total_row(total):
-        # create empty frame to hold the row content
-        frm_entry_indiv = tk.Frame(master=frm_rows)
-        
-        """Add a new row of entries to the frame."""
-        global row_count, row_entries
-        row_count += 1
-        
-        # add individual entry widgets to the frame
-        lbl_hrs = tk.Label(master=frm_entry_indiv, text="Hours:")
-        ent_hrs = tk.Entry(master=frm_entry_indiv)
-        ent_hrs.insert(0, total[0])
-        
-        lbl_min = tk.Label(master=frm_entry_indiv, text="Minutes:")
-        ent_min = tk.Entry(master=frm_entry_indiv)
-        ent_min.insert(0, total[1])
-        
-        lbl_sec = tk.Label(master=frm_entry_indiv, text="Seconds:")
-        ent_sec = tk.Entry(master=frm_entry_indiv)
-        ent_sec.insert(0, total[2])
-
-        # store all entry widgets in row_entries for use in calculations
-        row_contents = [ent_hrs, ent_min, ent_sec]
-        row_entries.append(row_contents)
-
-        # layout individual entry widgets in the frame
-        lbl_hrs.grid(row=row_count, column=0)
-        ent_hrs.grid(row=row_count, column=1)
-        lbl_min.grid(row=row_count, column=2)
-        ent_min.grid(row=row_count, column=3)
-        lbl_sec.grid(row=row_count, column=4)
-        ent_sec.grid(row=row_count, column=5)
-
-        # add the entries to the frm_rows grid as a new row
-        frm_entry_indiv.grid(row=row_count,column=0, sticky="ns", padx=5)
-
-    def clear_rows():
+    def clear_rows(self):
         """Destroy all widgets in the rows section."""
-        for widget in frm_rows.winfo_children():
+        for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
             # reset related values
             global row_entries, row_count
             row_entries = []
             row_count = 0
 
-        add_row() # add a single blank row
-        assign_totals() # assign the new empty total
-        window.title("SimpleTimeClock")
+        self.add_row() # add a single blank row
+        # assign_totals() # assign the new empty total
+        self.title("SimpleTimeClock")
 
-    btn_clear.config(command=clear_rows)
-
-    add_row() # add at least one row of entries at start
-    
-    # create button to handle adding new row of entries
-    btn_new_row = tk.Button(master=frm_entry, text="New Row", command=add_row)
-
-    # create button to handle calculation of time
-    btn_calculate = tk.Button(master=frm_entry, text="Calculate")
-
-    # create frame to handle total time calculation
-    frm_total = tk.Frame(master=frm_entry)
-    # add individual total widgets to the frame
-    lbl_total = tk.Label(master=frm_total, text="Total \N{RIGHTWARDS BLACK ARROW}")
-    lbl_total_hrs = tk.Label(master=frm_total, text="0 Hours,")
-    lbl_total_min = tk.Label(master=frm_total, text="0 Minutes,")
-    lbl_total_sec = tk.Label(master=frm_total, text="0 Seconds")
-
-    # layout frm_total level widgets inside frm_total
-    lbl_total.grid(row=0, column = 0)
-    lbl_total_hrs.grid(row=0, column=1)
-    lbl_total_min.grid(row=0, column=2)
-    lbl_total_sec.grid(row=0, column=3)
-
-    def assign_totals():
+    def assign_totals(self):
         """
         Assign calculated total values for hours, minutes, and seconds
         to the corresponding labels in frm_total.
         """
-        total_values = backend_module.calculate_total(row_entries)
-        lbl_total_hrs['text'] = f"{total_values[0]} Hours,"
-        lbl_total_min['text'] = f"{total_values[1]} Minutes,"
-        lbl_total_sec['text'] = f"{total_values[2]} Seconds"
+        self.total_values = self.backend.calculate_total(self.row_entries)
+        self.lbl_total_hrs['text'] = f"{self.total_values[0]} Hours,"
+        self.lbl_total_min['text'] = f"{self.total_values[1]} Minutes,"
+        self.lbl_total_sec['text'] = f"{self.total_values[2]} Seconds"
 
-    def save_total():
+    def save_total(self):
         """
         Save the calculated total for hours, minutes, and seconds
         to a text file for future viewing/loading.
         """
-        total = backend_module.calculate_total(row_entries)
+        total = self.total_values
         savepath = asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
@@ -170,9 +167,44 @@ def run(backend_module):
             output.write("Total Time:\n")
             output.write(f"{str(total[0])} hours, {str(total[1])} minutes, {str(total[2])} seconds")
             
-        window.title(f"SimpleTimeClock - {savepath}")
+        self.title(f"SimpleTimeClock - {savepath}")
 
-    def load_total():
+    def add_total_row(self, total):
+        # create empty frame to hold the row content
+        frm_entry_indiv = tk.Frame(self.scrollable_frame)
+        
+        """Add a new row of entries to the frame."""
+        self.row_count += 1
+        
+        # add individual entry widgets to the frame
+        lbl_hrs = tk.Label(frm_entry_indiv, text="Hours:")
+        ent_hrs = tk.Entry(frm_entry_indiv, width=5)
+        ent_hrs.insert(0, total[0])
+        
+        lbl_min = tk.Label(frm_entry_indiv, text="Minutes:")
+        ent_min = tk.Entry(frm_entry_indiv, width=5)
+        ent_min.insert(0, total[1])
+        
+        lbl_sec = tk.Label(frm_entry_indiv, text="Seconds:")
+        ent_sec = tk.Entry(frm_entry_indiv, width=5)
+        ent_sec.insert(0, total[2])
+
+        # store all entry widgets in row_entries for use in calculations
+        row_contents = [ent_hrs, ent_min, ent_sec]
+        self.row_entries.append(row_contents)
+
+        # layout individual entry widgets in the frame
+        lbl_hrs.grid(row=self.row_count, column=0)
+        ent_hrs.grid(row=self.row_count, column=1)
+        lbl_min.grid(row=self.row_count, column=2)
+        ent_min.grid(row=self.row_count, column=3)
+        lbl_sec.grid(row=self.row_count, column=4)
+        ent_sec.grid(row=self.row_count, column=5)
+
+        # add the entries to the frm_rows grid as a new row
+        frm_entry_indiv.grid(row=self.row_count,column=0, sticky="ns", padx=5)
+
+    def load_total(self):
         """
         Load a pre-existing timesheet into the program
         keeping track of the prior total in the first row.
@@ -183,42 +215,23 @@ def run(backend_module):
         if not timesheet_path:
             return
 
-        for widget in frm_rows.winfo_children():
+        for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
             # reset related values
-            global row_entries, row_count
-            row_entries = []
-            row_count = 0
+            self.row_entries = []
+            self.row_count = 0
 
-        row_total = ""
+        self.totals = []
         with open(timesheet_path, "r") as input:
             input.readline()
-            row_total = input.readline().split()
-        for word in row_total:
+            read_total = input.readline().split()
+        for word in read_total:
             if word.isnumeric():
-                continue
+                self.totals.append(int(word))
             else:
                 # remove any non-numeric content
-                row_total.remove(word)
-        total = [row_total[0], row_total[1], row_total[2]]
-        add_total_row(total) # add the prior total to the top of an empty sheet
-        assign_totals()
+                continue
+        self.add_total_row(self.totals) # add the prior total to the top of an empty sheet
+        self.assign_totals()
 
-        window.title(f"SimpleTimeClock - {timesheet_path}")
-
-
-    btn_save.config(command=save_total)
-    btn_calculate.config(command=assign_totals)
-    btn_load.config(command=load_total)
-
-    # layout frm_entry level widgets inside frm_entry
-    frm_rows.grid(row=0, column=0)
-    btn_new_row.grid(row=1, column=0, sticky="ew", padx=5)
-    btn_calculate.grid(row=1, column=1, sticky="ew",padx=5)
-    frm_total.grid(row=2, column=0)
-
-    # add top-level widgets to main grid
-    frm_buttons.grid(row=0, column=0, sticky="ns")
-    frm_entry.grid(row=0, column=1, sticky="ns")    
-    # Run the event loop
-    window.mainloop()
+        self.title(f"SimpleTimeClock - {timesheet_path}")

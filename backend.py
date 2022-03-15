@@ -1,9 +1,7 @@
 from os import system, name
-import os
 from time import sleep
 from datetime import date
 from sys import exit
-from tkinter import Entry, Label
 
 current_date = date.today() # store today's current date
 
