@@ -127,18 +127,19 @@ class Frontend(tk.Tk):
 
         # add the entries to the scrollable_frame grid as a new row
         frm_entry_indiv.grid(row=self.row_count,column=0, sticky="ew", padx=5)
-
+        
     def clear_rows(self):
         """Destroy all widgets in the rows section."""
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
-            # reset related values
-            global row_entries, row_count
-            row_entries = []
-            row_count = 0
+            
+        # reset row-tracking attributes
+        self.row_entries = []
+        self.row_count = 0
 
         self.add_row() # add a single blank row
-        # assign_totals() # assign the new empty total
+        
+        self.assign_totals() # assign the new empty total
         self.title("SimpleTimeClock")
 
     def assign_totals(self):
