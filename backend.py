@@ -7,15 +7,18 @@ current_date = date.today() # store today's current date
 
 def get_row_info(row):
     """Return a list with the hours, minutes, and seconds of an individual row."""
-    try:
-        row_info = [int(row[0].get()), int(row[1].get()), int(row[2].get())]
-        return row_info
-    except(ValueError):
-        print("Error, expecting integer values.")
-        # if invalid values detected, fill in with empty (0) entries
-        row_info = [0, 0, 0]
-    finally:
-        return row_info
+    row_info = []
+    # get time for each position in the row (hours/minutes/seconds)
+    for time_pos in row:
+        try:
+            interval_info = int(time_pos.get())
+        except(ValueError):
+            print("Error, expecting integer value for time value.")
+            # if invalid value detected, fill set position to value 0
+            interval_info = 0
+        finally:
+            row_info.append(interval_info)
+    return row_info
 
 
 def format_time(total):
@@ -25,14 +28,17 @@ def format_time(total):
     time denominations (ie: 120 seconds becomes 2 minutes,
     180 minutes becomes three hours and so on).
     """
-    index = 0
-    for item in total:
-        if item / 60 >= 1 and index != 0:
-            item_remainder = item % 60
-            quotient = int(item / 60)
-            total[index - 1] += quotient
-            total[index] = item_remainder
-        index += 1
+    position = 2
+    for interval in reversed(total):
+        # only convert minutes/seconds to higher intervals
+        if interval / 60 >= 1 and position != 0:
+            interval_remainder = interval % 60
+            interval_quotient = int(interval / 60)
+            total[position - 1] += interval_quotient
+            total[position] = interval_remainder
+        position -= 1 # track which interval (hr/min/sec) is being converted
+
+    # return the total after any conversions
     return total
 
 
